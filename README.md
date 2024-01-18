@@ -6,5 +6,5 @@ First we need to install  [packer.nvim](https://github.com/wbthomason/packer.nvi
 ```
 We need to put configuration in folers: ~/.config/neovim
 ```
-  git clone https://github.com/fikolis/nvim.git ~/.config/neovim
+  git clone https://github.com/fikolis/nvim.git ~/.config/nvim
 ```
