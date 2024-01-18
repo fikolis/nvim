@@ -32,6 +32,8 @@ return require('packer').startup(function(use)
   use("theprimeagen/harpoon")
   use("mbbill/undotree")
   use("tpope/vim-fugitive")
+  use("yaegassy/coc-ansible")
+  use("pearofducks/ansible-vim")
 
   use {
 	  'VonHeikemen/lsp-zero.nvim',
