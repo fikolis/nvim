@@ -43,6 +43,7 @@ return require('packer').startup(function(use)
   use("tpope/vim-fugitive")
   use("yaegassy/coc-ansible")
   use("pearofducks/ansible-vim")
+  use("folke/zen-mode.nvim")
 
   use {
 	  'VonHeikemen/lsp-zero.nvim',
