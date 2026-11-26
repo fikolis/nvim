@@ -26,13 +26,17 @@ Optional DevOps tools: `terraform`, `ansible-lint` (via `pipx`), `prettier`, `tf
 
 ### RHEL / Rocky / AlmaLinux (9+)
 
-> **Note:** Default RHEL repositories do not ship Neovim `0.12+` or `tree-sitter-cli`. Install core dependencies via `dnf`, then install Neovim and `tree-sitter-cli` from official releases / `npm`.
+> **Note:** Default RHEL 9 repositories ship `glibc 2.34`, `nodejs:16` (EOL), and no Neovim `0.12+`. Prebuilt `tree-sitter-cli` binaries (from `npm` or GitHub releases) require `GLIBC_2.35+` / `GLIBC_2.39`, so `tree-sitter-cli` must be compiled locally with Cargo on RHEL 9.
 
-1. **System packages (AppStream + EPEL):**
+1. **System packages + Node.js 22 (AppStream + EPEL):**
 
 ```bash
 # Enable EPEL (RHEL 9; on Rocky/Alma you can run: sudo dnf install -y epel-release)
 sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+
+# Switch from default Node 16 to Node 22 (required by modern Mason LSPs)
+sudo dnf module reset -y nodejs
+sudo dnf module enable -y nodejs:22
 
 # Core requirements for lazy.nvim, treesitter, Mason LSPs, and Snacks picker
 sudo dnf install -y git gcc gcc-c++ make curl tar unzip gzip ripgrep fd-find nodejs npm python3 python3-pip
@@ -49,14 +53,16 @@ rm -f nvim-linux-x86_64.tar.gz
 nvim --version
 ```
 
-3. **`tree-sitter-cli` (required to build parsers on `nvim-treesitter` `main`):**
+3. **`tree-sitter-cli` (compiled natively via Cargo for RHEL 9's `glibc 2.34`):**
 
 ```bash
-sudo npm install -g tree-sitter-cli
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+cargo install --locked tree-sitter-cli
 tree-sitter --version
 ```
 
-*(Alternatively, download the prebuilt `tree-sitter-linux-x64.gz` binary from [tree-sitter releases](https://github.com/tree-sitter/tree-sitter/releases) into `/usr/local/bin/tree-sitter`.)*
+*(Make sure `~/.cargo/bin` is in your `$PATH`, e.g. via `source "$HOME/.cargo/env"` in `~/.bashrc`.)*
 
 4. **Optional DevOps / Ansible linters & formatters:**
 
