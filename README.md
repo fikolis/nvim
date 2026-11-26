@@ -50,6 +50,7 @@ Run `:checkhealth` inside Neovim to verify LSP, `blink.cmp`, `snacks`, `which-ke
     ├── init.lua            # Core autocmds, DevOps YAML filetypes, LspAttach keymaps
     ├── set.lua             # Editor options, 0.12 winborder/nohlsearch, 2-space DevOps indent
     ├── remap.lua           # Core motions, clipboard, tmux-sessionizer, builtin undotree
+    ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, grok, opencode, codex)
     ├── lazy_init.lua       # lazy.nvim bootstrap & performance config
     └── lazy/
         ├── colors.lua      # rose-pine (transparent) + tokyonight (lazy)
@@ -62,7 +63,7 @@ Run `:checkhealth` inside Neovim to verify LSP, `blink.cmp`, `snacks`, `which-ke
         ├── linting.lua     # nvim-lint
         ├── lsp.lua         # nvim-lspconfig, mason v2, SchemaStore.nvim, fidget.nvim
         ├── oil.lua         # oil.nvim
-        ├── snacks.lua      # snacks.nvim (picker, lazygit, notifier, input, bigfile, words)
+        ├── snacks.lua      # snacks.nvim (picker, terminal, lazygit, notifier, input, bigfile, words)
         ├── surround.lua    # nvim-surround
         ├── treesitter.lua  # nvim-treesitter + nvim-treesitter-textobjects
         ├── trouble.lua     # trouble.nvim
@@ -155,6 +156,15 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `]f` / `[f`, `]c` / `[c` | Jump to next / previous function or class |
 | `ys`, `cs`, `ds` | Surround add / change / delete (`nvim-surround`) |
 | `gc` / `gcc` | Built-in comment operator / line |
+
+### AI CLI Floats (`Snacks.terminal`)
+| Key | Action |
+|---|---|
+| `<leader>ca` | Toggle `agy` floating terminal |
+| `<leader>cg` | Toggle `grok` floating terminal |
+| `<leader>co` | Toggle `opencode` floating terminal |
+| `<leader>cx` | Toggle `codex` floating terminal |
+| `<C-q>` *(in float)* | Hide AI float without stopping the session (`q` also hides in normal mode) |
 
 ### Tmux & Utilities
 | Key | Action |

@@ -8,6 +8,7 @@ return {
         notifier = { enabled = true },
         picker = { enabled = true, ui_select = true },
         quickfile = { enabled = true },
+        terminal = { enabled = true },
         words = { enabled = true },
     },
     keys = {

@@ -1,6 +1,7 @@
 require("fikolis.remap")
 require("fikolis.set")
 require("fikolis.lazy_init")
+require("fikolis.ai").setup()
 
 local augroup = vim.api.nvim_create_augroup
 local FikolisGroup = augroup("Fikolis", {})
