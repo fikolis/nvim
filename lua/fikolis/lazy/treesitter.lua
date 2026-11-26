@@ -1,52 +1,92 @@
 return {
-    "nvim-treesitter/nvim-treesitter",
-    branch = "master",
-    event = { "BufReadPost", "BufNewFile" },
-    cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
-    build = ":TSUpdate",
-    dependencies = {
-        { "nvim-treesitter/nvim-treesitter-textobjects", branch = "master" },
-    },
-    config = function()
-        require("nvim-treesitter.configs").setup({
-            ensure_installed = {
+    {
+        "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        lazy = false,
+        build = ":TSUpdate",
+        config = function()
+            local ts = require("nvim-treesitter")
+            ts.setup({})
+
+            local parsers = {
                 "bash", "dockerfile", "go", "hcl", "json", "lua",
                 "markdown", "markdown_inline", "python", "query",
                 "rust", "terraform", "toml", "vim", "vimdoc", "yaml",
-            },
-            sync_install = false,
-            auto_install = false,
-            indent = { enable = true },
-            highlight = {
-                enable = true,
-                additional_vim_regex_highlighting = false,
-            },
-            textobjects = {
+            }
+
+            local installed = {}
+            for _, lang in ipairs(ts.get_installed()) do
+                installed[lang] = true
+            end
+
+            local missing = vim.tbl_filter(function(lang)
+                return not installed[lang]
+            end, parsers)
+
+            if #missing > 0 then
+                ts.install(missing)
+            end
+
+            vim.api.nvim_create_autocmd("FileType", {
+                group = vim.api.nvim_create_augroup("FikolisTreesitter", { clear = true }),
+                callback = function(ev)
+                    if pcall(vim.treesitter.start, ev.buf) and vim.bo[ev.buf].buftype == "" then
+                        vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                    end
+                end,
+            })
+        end,
+    },
+    {
+        "nvim-treesitter/nvim-treesitter-textobjects",
+        branch = "main",
+        event = { "BufReadPost", "BufNewFile" },
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
+        config = function()
+            require("nvim-treesitter-textobjects").setup({
                 select = {
-                    enable = true,
                     lookahead = true,
-                    keymaps = {
-                        ["af"] = { query = "@function.outer", desc = "Select outer function" },
-                        ["if"] = { query = "@function.inner", desc = "Select inner function" },
-                        ["ac"] = { query = "@class.outer", desc = "Select outer class" },
-                        ["ic"] = { query = "@class.inner", desc = "Select inner class" },
-                        ["aa"] = { query = "@parameter.outer", desc = "Select outer parameter" },
-                        ["ia"] = { query = "@parameter.inner", desc = "Select inner parameter" },
-                    },
                 },
                 move = {
-                    enable = true,
                     set_jumps = true,
-                    goto_next_start = {
-                        ["]f"] = { query = "@function.outer", desc = "Next function start" },
-                        ["]c"] = { query = "@class.outer", desc = "Next class start" },
-                    },
-                    goto_previous_start = {
-                        ["[f"] = { query = "@function.outer", desc = "Prev function start" },
-                        ["[c"] = { query = "@class.outer", desc = "Prev class start" },
-                    },
                 },
-            },
-        })
-    end,
+            })
+
+            local select = require("nvim-treesitter-textobjects.select")
+            local select_maps = {
+                ["af"] = { "@function.outer", "Select outer function" },
+                ["if"] = { "@function.inner", "Select inner function" },
+                ["ac"] = { "@class.outer", "Select outer class" },
+                ["ic"] = { "@class.inner", "Select inner class" },
+                ["aa"] = { "@parameter.outer", "Select outer parameter" },
+                ["ia"] = { "@parameter.inner", "Select inner parameter" },
+            }
+            for lhs, spec in pairs(select_maps) do
+                vim.keymap.set({ "x", "o" }, lhs, function()
+                    select.select_textobject(spec[1], "textobjects")
+                end, { desc = spec[2] })
+            end
+
+            local move = require("nvim-treesitter-textobjects.move")
+            local move_next = {
+                ["]f"] = { "@function.outer", "Next function start" },
+                ["]c"] = { "@class.outer", "Next class start" },
+            }
+            for lhs, spec in pairs(move_next) do
+                vim.keymap.set({ "n", "x", "o" }, lhs, function()
+                    move.goto_next_start(spec[1], "textobjects")
+                end, { desc = spec[2] })
+            end
+
+            local move_prev = {
+                ["[f"] = { "@function.outer", "Prev function start" },
+                ["[c"] = { "@class.outer", "Prev class start" },
+            }
+            for lhs, spec in pairs(move_prev) do
+                vim.keymap.set({ "n", "x", "o" }, lhs, function()
+                    move.goto_previous_start(spec[1], "textobjects")
+                end, { desc = spec[2] })
+            end
+        end,
+    },
 }

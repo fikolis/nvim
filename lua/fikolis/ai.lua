@@ -23,7 +23,7 @@ local function toggle_ai(name, cmd)
             title_pos = "center",
             keys = {
                 hide_term = { "<C-q>", "hide", mode = { "t", "n" }, desc = "Hide AI float" },
-                hide_normal = { "q", "hide", mode = "n", desc = "Hide AI float" },
+                q = { "q", "hide", mode = "n", desc = "Hide AI float" },
             },
         },
     })

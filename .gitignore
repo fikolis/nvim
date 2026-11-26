@@ -2,3 +2,4 @@ plugin/packer_compiled.lua
 pack/
 .nvimlog
 nvim.log
+neovim-config.md
