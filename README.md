@@ -11,14 +11,64 @@ Fast, keyboard-first Neovim configuration built for DevOps and software engineer
 ## Requirements
 
 - **Neovim** `>= 0.12.0`
-- **Git** & a **C compiler** (`cc`/`clang` for Treesitter parsers)
-- Recommended CLI tools (macOS / Homebrew):
+- **Git**, **curl**, **tar**, **unzip**, and a **C compiler** (`gcc`/`clang`)
+- **`tree-sitter-cli`** (required by `nvim-treesitter` `main` branch to compile parsers)
+- **Node.js / npm** (for Mason LSPs: `ansiblels`, `yamlls`, `bashls`, `dockerls`, `jsonls`)
+- **`ripgrep`** (`rg`) and **`fd`** (for `Snacks.picker`)
+
+### macOS (Homebrew)
 
 ```bash
-brew install neovim ripgrep fd lazygit stylua shfmt hadolint shellcheck yamllint yamlfmt
+brew install neovim tree-sitter-cli ripgrep fd lazygit stylua shfmt hadolint shellcheck yamllint yamlfmt
 ```
 
 Optional DevOps tools: `terraform`, `ansible-lint` (via `pipx`), `prettier`, `tflint` (via `:MasonInstall tflint`).
+
+### RHEL / Rocky / AlmaLinux (9+)
+
+> **Note:** Default RHEL repositories do not ship Neovim `0.12+` or `tree-sitter-cli`. Install core dependencies via `dnf`, then install Neovim and `tree-sitter-cli` from official releases / `npm`.
+
+1. **System packages (AppStream + EPEL):**
+
+```bash
+# Enable EPEL (RHEL 9; on Rocky/Alma you can run: sudo dnf install -y epel-release)
+sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+
+# Core requirements for lazy.nvim, treesitter, Mason LSPs, and Snacks picker
+sudo dnf install -y git gcc gcc-c++ make curl tar unzip gzip ripgrep fd-find nodejs npm python3 python3-pip
+```
+
+2. **Neovim `0.12+` (official Linux tarball, works over SSH without FUSE):**
+
+```bash
+curl -fsSLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim-linux-x86_64
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+rm -f nvim-linux-x86_64.tar.gz
+nvim --version
+```
+
+3. **`tree-sitter-cli` (required to build parsers on `nvim-treesitter` `main`):**
+
+```bash
+sudo npm install -g tree-sitter-cli
+tree-sitter --version
+```
+
+*(Alternatively, download the prebuilt `tree-sitter-linux-x64.gz` binary from [tree-sitter releases](https://github.com/tree-sitter/tree-sitter/releases) into `/usr/local/bin/tree-sitter`.)*
+
+4. **Optional DevOps / Ansible linters & formatters:**
+
+```bash
+# Ansible & YAML linting
+pip3 install --user ansible-lint yamllint
+
+# Shell linting (via EPEL)
+sudo dnf install -y ShellCheck
+```
+
+Other formatters/linters (`stylua`, `shfmt`, `yamlfmt`, `hadolint`, `tflint`, `prettier`) can be installed directly inside Neovim via `:MasonInstall`. Everything in `nvim-lint` and `conform.nvim` degrades gracefully if a tool isn't installed.
 
 ---
 
@@ -27,7 +77,11 @@ Optional DevOps tools: `terraform`, `ansible-lint` (via `pipx`), `prettier`, `tf
 Back up any existing config, then clone into `~/.config/nvim`:
 
 ```bash
-git clone -b nvim-reconfigure-26 git@github.com:fikolis/nvim.git ~/.config/nvim
+# SSH
+git clone git@github.com:fikolis/nvim.git ~/.config/nvim
+
+# Or HTTPS (handy on remote servers without SSH keys)
+git clone https://github.com/fikolis/nvim.git ~/.config/nvim
 ```
 
 Start Neovim (or sync plugins headlessly):
@@ -36,7 +90,7 @@ Start Neovim (or sync plugins headlessly):
 nvim --headless "+Lazy! sync" +qa
 ```
 
-Run `:checkhealth` inside Neovim to verify LSP, `blink.cmp`, `snacks`, `which-key`, and `mason`.
+Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verify parsers, LSPs, `blink.cmp`, `snacks`, and `which-key`.
 
 ---
 
