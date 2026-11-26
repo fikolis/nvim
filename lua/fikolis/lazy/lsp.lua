@@ -28,8 +28,10 @@ return {
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
+                "powershell_es",
+                "bashls",
+                "yamlls",
                 "ansiblels",
-                "tsserver",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -48,6 +50,48 @@ return {
                                 diagnostics = {
                                     globals = { "vim", "it", "describe", "before_each", "after_each" },
                                 }
+                            }
+                        }
+                    }
+                end,
+
+                ["yamlls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.yamlls.setup {
+                        capabilities = capabilities,
+                        settings = {
+                            yaml = {
+                                schemas = {
+                                    ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*.{yml,yaml}",
+                                    ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = "docker-compose*.{yml,yaml}",
+                                    ["https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/data/.ansible-lint-ignore.yaml"] = "**/.ansible-lint*",
+                                    ["https://raw.githubusercontent.com/ansible/schemas/main/ansible.json"] = "**/*ansible*/**/*.{yml,yaml}",
+                                    ["https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/v3/api__v1_openapi.json"] = "**/k8s/**/*.{yml,yaml}",
+                                    ["https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/v3/apis__apps__v1_openapi.json"] = "**/k8s/**/*.{yml,yaml}",
+                                },
+                                format = {
+                                    enable = true,
+                                    singleQuote = false,
+                                    bracketSpacing = true,
+                                    proseWrap = "preserve",
+                                },
+                                validate = true,
+                                hover = true,
+                                completion = true,
+                                customTags = {
+                                    ["!reference"] = "scalar",
+                                    ["!Ref"] = "scalar",
+                                    ["!GetAtt"] = "scalar",
+                                    ["!Sub"] = "scalar",
+                                    ["!Join"] = "sequence",
+                                    ["!Split"] = "sequence",
+                                    ["!Select"] = "scalar",
+                                    ["!FindInMap"] = "sequence",
+                                    ["!Base64"] = "scalar",
+                                    ["!Cidr"] = "sequence",
+                                    ["!ImportValue"] = "scalar",
+                                    ["!GetAZs"] = "scalar",
+                                },
                             }
                         }
                     }

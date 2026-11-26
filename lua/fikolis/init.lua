@@ -6,7 +6,8 @@ require ("fikolis.lazy_init")
 vim.api.nvim_exec([[
     augroup FileTypeYAML
     autocmd!
-    autocmd BufNewFile,BufRead */ansible*/*.yaml,*/ansible*/*.yml,*/*ansible*/*.yaml,*/*ansible*/*.yml setl ft=yaml.ansible
+    autocmd BufNewFile,BufRead */sysprep/*.yaml,*/sysprep/*.yml,*/ansible*/*.yaml,*/ansible*/*.yml,*/*ansible*/*.yaml,*/*ansible*/*.yml setl ft=yaml.ansible
+    autocmd BufNewFile,BufRead **/*ocp*/**/*.yaml,**/*ocp*/**/*.yml,**/k8s/**/*.yaml,**/k8s/**/*.yml,**/kubernetes/**/*.yaml,**/kubernetes/**/*.yml setl ft=yaml.kubernetes
 augroup END
 ]], false)
 

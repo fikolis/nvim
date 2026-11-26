@@ -9,7 +9,6 @@ lsp.ensure_installed({
   'yamlls',
   'terraformls',
   'dockerls',
-  
 })
 
 -- Fix Undefined global 'vim'
