@@ -9,7 +9,8 @@ return {
             sh = { "shellcheck" },
             terraform = { "tflint" },
             yaml = { "yamllint" },
-            ["yaml.ansible"] = { "ansible_lint" },
+            ["yaml.ansible"] = {}, -- ansiblels already runs ansible-lint (which includes yamllint)
+            ["yaml.jinja"] = {}, -- do not run yamllint on Jinja templates
         }
 
         local function try_lint_available()

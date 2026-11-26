@@ -22,9 +22,15 @@ return {
             markdown = { "prettier" },
             sh = { "shfmt" },
             terraform = { "terraform_fmt" },
-            yaml = { "yamlfmt" },
+            yaml = function(bufnr)
+                if vim.bo[bufnr].filetype == "yaml.jinja" then
+                    return {}
+                end
+                return { "yamlfmt" }
+            end,
             ["yaml.ansible"] = { "yamlfmt" },
             ["yaml.kubernetes"] = { "yamlfmt" },
+            ["yaml.jinja"] = {}, -- do not run yamlfmt on Jinja templates
         },
         default_format_opts = {
             lsp_format = "fallback",

@@ -8,8 +8,6 @@ vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 
-vim.opt.smartindent = true
-
 vim.opt.wrap = false
 
 vim.opt.swapfile = false
@@ -38,7 +36,7 @@ vim.opt.timeoutlen = 300
 -- 2-space indentation for DevOps / config filetypes
 vim.api.nvim_create_autocmd("FileType", {
     group = vim.api.nvim_create_augroup("FikolisIndent", { clear = true }),
-    pattern = { "yaml", "yaml.ansible", "yaml.kubernetes", "json", "jsonc", "terraform", "hcl", "helm" },
+    pattern = { "yaml", "yaml.ansible", "yaml.kubernetes", "yaml.jinja", "jinja", "json", "jsonc", "terraform", "hcl", "helm" },
     callback = function()
         vim.opt_local.tabstop = 2
         vim.opt_local.softtabstop = 2
