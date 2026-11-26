@@ -1,42 +1,28 @@
 return {
     "tpope/vim-fugitive",
+    cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete", "GBrowse" },
+    keys = {
+        { "<leader>gs", "<cmd>Git<CR>", desc = "Git: Status (Fugitive)" },
+        { "<leader>gb", ":Git checkout -b ", desc = "Git: Checkout new branch" },
+        { "<leader>g2", "<cmd>diffget //2<CR>", desc = "Git: Diffget ours (//2)" },
+        { "<leader>g3", "<cmd>diffget //3<CR>", desc = "Git: Diffget theirs (//3)" },
+    },
     config = function()
-        vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
-
-        local Fikolis_Fugitive = vim.api.nvim_create_augroup("Fikolis_Fugitive", {})
-
-        local autocmd = vim.api.nvim_create_autocmd
-        autocmd("BufWinEnter", {
-            group = Fikolis_Fugitive,
-            pattern = "*",
-            callback = function()
-                if vim.bo.ft ~= "fugitive" then
-                    return
+        vim.api.nvim_create_autocmd("FileType", {
+            group = vim.api.nvim_create_augroup("FikolisFugitive", { clear = true }),
+            pattern = "fugitive",
+            callback = function(ev)
+                local opts = function(desc)
+                    return { buffer = ev.buf, remap = false, desc = desc }
                 end
-
-                local bufnr = vim.api.nvim_get_current_buf()
-                local opts = {buffer = bufnr, remap = false}
                 vim.keymap.set("n", "<leader>p", function()
-                    vim.cmd.Git('push')
-                end, opts)
-
-                -- rebase always
-               -- vim.keymap.set("n", "<leader>P", function()
-                --    vim.cmd.Git('pull',  '--rebase')
-               -- end, opts)
-				vim.keymap.set("n", "<leader>P", function()
-    				vim.cmd.Git("pull --rebase")
-				end, opts)
-
-                -- NOTE: It allows me to easily set the branch i am pushing and any tracking
-                -- needed if i did not set the branch up correctly
-                vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts);
+                    vim.cmd.Git("push")
+                end, opts("Git: Push"))
+                vim.keymap.set("n", "<leader>P", function()
+                    vim.cmd.Git("pull --rebase")
+                end, opts("Git: Pull --rebase"))
+                vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts("Git: Push and set upstream"))
             end,
         })
-
-
-        vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>")
-        vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>")
-        vim.keymap.set('n', '<leader>gb', ':Git checkout -b ', { noremap = true })
-    end
+    end,
 }

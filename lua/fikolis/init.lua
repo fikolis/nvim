@@ -1,21 +1,12 @@
-require ("fikolis.remap")
-require ("fikolis.set")
-require ("fikolis.lazy_init")
-
--- Set file type for YAML files with .yaml and .yml extensions
-vim.api.nvim_exec([[
-    augroup FileTypeYAML
-    autocmd!
-    autocmd BufNewFile,BufRead */sysprep/*.yaml,*/sysprep/*.yml,*/ansible*/*.yaml,*/ansible*/*.yml,*/*ansible*/*.yaml,*/*ansible*/*.yml setl ft=yaml.ansible
-    autocmd BufNewFile,BufRead **/*ocp*/**/*.yaml,**/*ocp*/**/*.yml,**/k8s/**/*.yaml,**/k8s/**/*.yml,**/kubernetes/**/*.yaml,**/kubernetes/**/*.yml setl ft=yaml.kubernetes
-augroup END
-]], false)
+require("fikolis.remap")
+require("fikolis.set")
+require("fikolis.lazy_init")
 
 local augroup = vim.api.nvim_create_augroup
-local FikolisGroup = augroup('ThePrimeagen', {})
+local FikolisGroup = augroup("Fikolis", {})
 
 local autocmd = vim.api.nvim_create_autocmd
-local yank_group = augroup('HighlightYank', {})
+local yank_group = augroup("HighlightYank", {})
 
 function R(name)
     require("plenary.reload").reload_module(name)
@@ -23,42 +14,58 @@ end
 
 vim.filetype.add({
     extension = {
-        templ = 'templ',
-    }
+        templ = "templ",
+    },
+    pattern = {
+        [".*/sysprep/.*%.ya?ml"] = "yaml.ansible",
+        [".*ansible.*/.*%.ya?ml"] = "yaml.ansible",
+        [".*ocp.*/.*%.ya?ml"] = "yaml.kubernetes",
+        [".*/k8s/.*%.ya?ml"] = "yaml.kubernetes",
+        [".*/kubernetes/.*%.ya?ml"] = "yaml.kubernetes",
+    },
 })
 
-autocmd('TextYankPost', {
+autocmd("TextYankPost", {
     group = yank_group,
-    pattern = '*',
+    pattern = "*",
     callback = function()
-        vim.highlight.on_yank({
-            higroup = 'IncSearch',
+        vim.hl.on_yank({
+            higroup = "IncSearch",
             timeout = 40,
         })
     end,
 })
 
-autocmd({"BufWritePre"}, {
+autocmd("BufWritePre", {
     group = FikolisGroup,
     pattern = "*",
-    command = [[%s/\s\+$//e]],
+    callback = function()
+        if not vim.bo.modifiable or vim.bo.filetype == "markdown" or vim.bo.filetype == "diff" then
+            return
+        end
+        local view = vim.fn.winsaveview()
+        vim.cmd([[keeppatterns %s/\s\+$//e]])
+        vim.fn.winrestview(view)
+    end,
 })
 
-autocmd('LspAttach', {
+autocmd("LspAttach", {
     group = FikolisGroup,
     callback = function(e)
-        local opts = { buffer = e.buf }
-        vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-        vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
-        vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
-        vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
-        vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
-        vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
-        vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
-        vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
-        vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
-        vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
-    end
+        local map = function(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, lhs, rhs, { buffer = e.buf, desc = desc })
+        end
+        map("n", "gd", vim.lsp.buf.definition, "LSP: Go to definition")
+        map("n", "K", vim.lsp.buf.hover, "LSP: Hover documentation")
+        map("n", "<leader>vws", vim.lsp.buf.workspace_symbol, "LSP: Workspace symbol")
+        map("n", "<leader>vd", vim.diagnostic.open_float, "LSP: Show diagnostic float")
+        map("n", "<leader>vca", vim.lsp.buf.code_action, "LSP: Code action")
+        map("n", "<leader>vrr", vim.lsp.buf.references, "LSP: References")
+        map("n", "<leader>vrn", vim.lsp.buf.rename, "LSP: Rename symbol")
+        map("i", "<C-h>", vim.lsp.buf.signature_help, "LSP: Signature help")
+        map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, "LSP: Previous diagnostic")
+        map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, "LSP: Next diagnostic")
+    end,
 })
 
 vim.g.netrw_browse_split = 0
