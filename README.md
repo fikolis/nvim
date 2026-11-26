@@ -113,6 +113,7 @@ Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verif
     ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, grok, opencode, codex)
     ├── lazy_init.lua       # lazy.nvim bootstrap & performance config
     └── lazy/
+        ├── ai_completion.lua # minuet-ai.nvim inline Tab completion + provider switcher
         ├── colors.lua      # rose-pine (transparent) + tokyonight (lazy)
         ├── completion.lua  # blink.cmp + friendly-snippets
         ├── formatting.lua  # conform.nvim
@@ -217,7 +218,7 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `ys`, `cs`, `ds` | Surround add / change / delete (`nvim-surround`) |
 | `gc` / `gcc` | Built-in comment operator / line |
 
-### AI CLI Floats (`Snacks.terminal`)
+### AI CLI Floats (`Snacks.terminal`) & Inline Tab Completion (`minuet-ai.nvim`)
 | Key | Action |
 |---|---|
 | `<leader>ca` | Toggle `agy` floating terminal |
@@ -225,6 +226,11 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `<leader>co` | Toggle `opencode` floating terminal |
 | `<leader>cx` | Toggle `codex` floating terminal |
 | `<C-q>` *(in float)* | Hide AI float without stopping the session (`q` also hides in normal mode) |
+| `<leader>cm` | Switch AI Tab completion provider (`Grok`, `Claude`, `Gemini`, `OpenAI`, `Ollama`, `Off`) |
+| `<leader>ct` | Toggle AI Tab completion on/off |
+| `<Tab>` *(insert)* | Accept AI ghost text (falls back to normal `<Tab>` when none is visible) |
+| `<A-a>` / `<A-w>` *(insert)* | Accept AI suggestion line / word |
+| `<A-]>` / `<A-[>` / `<A-e>` *(insert)* | Next / previous / dismiss AI suggestion |
 
 ### Tmux & Utilities
 | Key | Action |
@@ -240,10 +246,11 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 
 ## DevOps Language Support
 
-- **Custom YAML Filetypes** ([init.lua](lua/fikolis/init.lua)):
-  - `*/sysprep/*.y{a,}ml`, `*ansible*/*.y{a,}ml` → `yaml.ansible`
-  - `*ocp*/*.y{a,}ml`, `*/k8s/*.y{a,}ml`, `*/kubernetes/*.y{a,}ml` → `yaml.kubernetes`
-- **2-Space Indentation** ([set.lua](lua/fikolis/set.lua)): auto-applied to `yaml`, `yaml.ansible`, `yaml.kubernetes`, `json`, `jsonc`, `terraform`, `hcl`, `helm`.
-- **LSPs (Mason `ensure_installed`):** `lua_ls`, `rust_analyzer`, `powershell_es`, `bashls`, `yamlls` (+ `SchemaStore.nvim` & CloudFormation/GitLab `!reference` custom tags), `ansiblels`, `terraformls`, `dockerls`, `jsonls` (+ `SchemaStore.nvim`), `gopls`.
+- **Custom YAML & Template Filetypes** ([init.lua](lua/fikolis/init.lua)):
+  - `*.y{a,}ml.j2` → `yaml.jinja` (`priority = 20`, excluded from `yamlls`, `yamlfmt`, and `yamllint`), `*.j2` → `jinja`
+  - `*ocp*/*.y{a,}ml`, `*/k8s/*.y{a,}ml`, `*/kubernetes/*.y{a,}ml` → `yaml.kubernetes` (`priority = 10`, always wins over Ansible)
+  - `*/sysprep/*`, `*ansible*/*`, standard Ansible dirs (`playbooks/`, `roles/*/tasks|handlers|vars|defaults/`, `group_vars/`, `host_vars/`), or any YAML under a project with `ansible.cfg`/`.ansible-lint` → `yaml.ansible`
+- **2-Space Indentation** ([set.lua](lua/fikolis/set.lua)): auto-applied to `yaml`, `yaml.ansible`, `yaml.kubernetes`, `yaml.jinja`, `jinja`, `json`, `jsonc`, `terraform`, `hcl`, `helm`.
+- **LSPs (Mason `ensure_installed`):** `lua_ls`, `rust_analyzer`, `powershell_es`, `bashls`, `yamlls` (+ `SchemaStore.nvim`, Kubernetes schema for `yaml.kubernetes`, CloudFormation/GitLab `!reference` custom tags), `ansiblels` (auto-detects working Python & `ansible-lint`), `terraformls` (`terraform`, `terraform-vars`, `hcl`), `dockerls`, `jsonls` (+ `SchemaStore.nvim`), `gopls`.
 - **Formatters (`conform.nvim`):** `stylua`, `shfmt`, `yamlfmt`, `terraform_fmt`, `gofmt`, `prettier`.
-- **Linters (`nvim-lint`):** `shellcheck`, `hadolint`, `tflint`, `yamllint`, `ansible-lint` (only runs when executable is installed on `PATH`).
+- **Linters (`nvim-lint`):** `shellcheck`, `hadolint`, `tflint`, `yamllint` (`ansible-lint` runs directly via `ansiblels`).
