@@ -53,7 +53,9 @@ rm -f nvim-linux-x86_64.tar.gz
 nvim --version
 ```
 
-3. **`tree-sitter-cli` (compiled natively via Cargo for RHEL 9's `glibc 2.34`):**
+3. **`tree-sitter-cli` *(optional on RHEL 9 — skip if you don't want Rust; Neovim degrades gracefully and built-in Lua/Markdown/Vim parsers still work)***:
+
+   If you want full Treesitter highlighting for YAML/Terraform/Bash/Dockerfile, compile `tree-sitter-cli` natively via Cargo for RHEL 9's `glibc 2.34`:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

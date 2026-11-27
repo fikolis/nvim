@@ -1,9 +1,23 @@
+local function has_working_tree_sitter_cli()
+    if vim.fn.executable("tree-sitter") ~= 1 then
+        return false
+    end
+    local ok, res = pcall(function()
+        return vim.system({ "tree-sitter", "--version" }):wait()
+    end)
+    return ok and res and res.code == 0
+end
+
 return {
     {
         "nvim-treesitter/nvim-treesitter",
         branch = "main",
         lazy = false,
-        build = ":TSUpdate",
+        build = function()
+            if has_working_tree_sitter_cli() then
+                vim.cmd("TSUpdate")
+            end
+        end,
         config = function()
             local ts = require("nvim-treesitter")
             ts.setup({})
@@ -23,7 +37,7 @@ return {
                 return not installed[lang]
             end, parsers)
 
-            if #missing > 0 then
+            if #missing > 0 and has_working_tree_sitter_cli() then
                 ts.install(missing)
             end
 
