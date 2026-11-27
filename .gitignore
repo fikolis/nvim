@@ -1,5 +1,7 @@
-plugin/packer_compiled.lua
-pack/
 .nvimlog
 nvim.log
 neovim-config.md
+
+# Learn Dojo player saves & temp files
+learn_nvim_dojo*.json
+learn_nvim-*.lua

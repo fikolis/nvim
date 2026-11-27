@@ -2,16 +2,24 @@
 --  NEOVIM DOJO — 33 NIVOA (MODIFIKOVANI VIM GOLF ZA TVOJ CONFIG)
 -- ============================================================================
 --  Kako se igra:
---    1. Otvori ovaj fajl u Neovimu: `nvim learn_nvim.lua`
---    2. Kreci se od Nivoa 1 ka Nivou 33 (ili skaci na nivo: `/NIVO 15` pa Enter).
---    3. Za svaki nivo: procitaj ZADATAK, uradi izmenu u bloku `IGRAJ OVDE`,
---       i uporedi sa `OCEKIVANI REZULTAT`.
---    4. Kad zavrsis ili hoces da ponovis nivo:
---         - `u` = undo
---         - `<leader>u` = Undotree (vrati se na bilo koju tacku u istoriji!)
---         - `:e!` = resetuj ceo fajl na pocetak (ako nisi sacuvao)
---    5. Leader taster ti je: <Space>
---    6. Zaboravio si precicu? Pritisni `<leader>?` ili `<leader>wk`.
+--    1. Otvori ovaj fajl: `nvim learn_nvim.lua`
+--    2. Radi nivoe redom (ili skoci: `/NIVO 15`, ili `:DojoNext`).
+--    3. Provera je automatska. Kad nivo prodje, pored naslova stane ✓.
+--       Delimican napredak je • i n/m. Winbar pokazuje skor i sta fali.
+--    4. `:Dojo` lista sve nivoe. `:DojoNext` skace na prvi nedovrsen.
+--    5. Vise igraca (Save / New / Load Game):
+--         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/33)
+--         - `:DojoSave [ime]` (ili `:w`) = Save Game (cuva napredak + kod, fajl na disku ostaje cist!)
+--         - `:DojoLoad [ime]` (ili `:DojoContinue`) = izaberi igraca i nastavi gde je stao
+--         - `:DojoDelete [ime]` = obrisi sacuvanog igraca
+--    6. `:DojoReset` vraca ceo tekst sa diska (sacuvani napredak ostaje).
+--       `:DojoResetLevel [N]` vraca samo trenutni (ili zadati) nivo i brise njegov check.
+--       `:DojoResetAll` brise napredak i runde trenutnog igraca.
+--    7. Fajl na disku se NIKAD ne menja — svi save-ovi idu u Neovim data folder.
+--       Kad zavrsis svih 33, bafer se sam vrati na pocetak i poveca broj rundi.
+--    8. Pogresan potez: `u` undo, `<leader>u` Undotree.
+--    9. Ne pritiskaj `<leader><leader>` ovde — source bi pokvario vezbu.
+--   10. Leader je <Space>. Podsetnik: `<leader>?`
 --
 --  Zasto `.lua` umesto `.txt`?
 --    Zato sto u `.lua` fajlu REALNO rade Treesitter (`af`/`if`/`aa`/`ia`/`]f`),
@@ -59,7 +67,7 @@ local nivo_02_targets = {
 -- NIVO 03 / 33 — Spajanje linija bez pomeranja kursora
 -- Precica: J  (tvoj remap: `mzJ`z` — spaja liniju ispod, kursor ostaje!)
 -- Par: 3 poteza
--- ZADATAK: Stani na pocetak linije `local cmd = "kubectl"` i spoji sve 4
+-- ZADATAK: Stani na pocetak linije `local nivo_03_cmd = "kubectl"` i spoji sve 4
 --          linije u jednu pomocu `J` (3x). Primeti da kursor ne bezi!
 -- ----------------------------------------------------------------------------
 -- IGRAJ OVDE:
@@ -100,8 +108,10 @@ local nivo_04_pipeline = {
 -- NIVO 05 / 33 — Brzi izlaz iz Insert moda sa <C-c>
 -- Precice: ci"  |  <C-c> (tvoj remap za <Esc> u Insert modu)
 -- Par: 6 poteza (bez teksta)
--- ZADATAK: Promeni `"BROKEN"` u `"HEALTHY"` pomocu `ci"` i izadji sa `<C-c>`.
---          Zatim promeni `"v0.0.1"` u `"v1.0.0"` na isti nacin.
+-- ZADATAK:
+--   1. Promeni `"BROKEN"` u `"HEALTHY"` pomocu `ci"`.
+--   2. Promeni `"v0.0.1"` u `"v1.0.0"` pomocu `ci"`.
+--   3. Izadji iz Insert moda pomocu `<C-c>` (umesto `<Esc>`).
 -- ----------------------------------------------------------------------------
 -- IGRAJ OVDE:
 local nivo_05_status = "BROKEN"
@@ -368,6 +378,7 @@ end
 --      `daa` (primeti da Treesitter brise i zarez!).
 --   2. U pozivu `nivo_18_call`, stani na `"staging"` i zameni ga u `"prod"`
 --      pomocu `cia`.
+--   3. U istom pozivu obrisi argument `false` pomocu `daa`.
 -- ----------------------------------------------------------------------------
 -- IGRAJ OVDE:
 local function nivo_18_deploy(env, unused_flag, replicas)
@@ -611,7 +622,7 @@ local nivo_31_service = {
 -- ZADATAK:
 --   1. Skoci u `nivo_32_build` sa `]f`.
 --   2. Obrisi `dead_arg` parametar sa `daa`.
---   3. U `nivo_32_runner`, zameni `'debug'` u `"release"` (ili `cia`).
+--   3. U `nivo_32_runner` obrisi `true` sa `daa`, pa zameni `'debug'` u `"release"`.
 --   4. Skini visak zagrada oko `(target)` sa `ds)`.
 --   5. Selektuj `nivo_32_build` sa `vaf` i sredi format sa `<leader>f`!
 -- ----------------------------------------------------------------------------
@@ -680,6 +691,7 @@ end
 -- end
 
 -- Izvoz da Lua zna da su lokalne promenljive/funkcije referencirane gde treba:
+---@diagnostic disable: undefined-global
 M.refs = {
     nivo_02_targets,
     nivo_03_cmd,
@@ -728,5 +740,6 @@ M.refs = {
     nivo_33_trash,
     nivo_33_deploy_cluster,
 }
+---@diagnostic enable: undefined-global
 
 return M

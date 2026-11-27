@@ -1,8 +1,9 @@
 {
-  "SchemaStore.nvim": { "branch": "main", "commit": "c01d3d7026af6347b03b05dc5972c072a7ed37af" },
+  "SchemaStore.nvim": { "branch": "main", "commit": "56b010e943cce0ddd13fa062f447e66e072a6b16" },
   "blink.cmp": { "branch": "main", "commit": "78336bc89ee5365633bcf754d93df01678b5c08f" },
   "cellular-automaton.nvim": { "branch": "main", "commit": "1606e9d5d04ff254023c3f3c62842d065708d6d3" },
   "conform.nvim": { "branch": "master", "commit": "016802de402556da54c36bd7359b441266b01cdd" },
+  "copilot.lua": { "branch": "master", "commit": "59403aefb11f2522217ac3926c9f262a2cf789d8" },
   "fidget.nvim": { "branch": "main", "commit": "9e0201673e08e997e7cf52afca5565c70bd117f3" },
   "friendly-snippets": { "branch": "main", "commit": "7a1c9f7897a4eb078b157a04c7af81e5869215b1" },
   "gitsigns.nvim": { "branch": "main", "commit": "166c03131e6a3528f692dd89f37668d991f17baa" },

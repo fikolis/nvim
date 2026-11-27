@@ -4,7 +4,7 @@ return {
     opts = {
         preset = "helix",
         spec = {
-            { "<leader>c", group = "AI CLI" },
+            { "<leader>c", group = "AI" },
             { "<leader>g", group = "Git" },
             { "<leader>gh", group = "Git hunks" },
             { "<leader>l", group = "LSP" },

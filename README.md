@@ -26,13 +26,17 @@ Optional DevOps tools: `terraform`, `ansible-lint` (via `pipx`), `prettier`, `tf
 
 ### RHEL / Rocky / AlmaLinux (9+)
 
-> **Note:** Default RHEL repositories do not ship Neovim `0.12+` or `tree-sitter-cli`. Install core dependencies via `dnf`, then install Neovim and `tree-sitter-cli` from official releases / `npm`.
+> **Note:** Default RHEL 9 repositories ship `glibc 2.34`, `nodejs:16` (EOL), and no Neovim `0.12+`. Prebuilt `tree-sitter-cli` binaries (from `npm` or GitHub releases) require `GLIBC_2.35+` / `GLIBC_2.39`, so `tree-sitter-cli` must be compiled locally with Cargo on RHEL 9.
 
-1. **System packages (AppStream + EPEL):**
+1. **System packages + Node.js 22 (AppStream + EPEL):**
 
 ```bash
 # Enable EPEL (RHEL 9; on Rocky/Alma you can run: sudo dnf install -y epel-release)
 sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+
+# Switch from default Node 16 to Node 22 (required by modern Mason LSPs)
+sudo dnf module reset -y nodejs
+sudo dnf module enable -y nodejs:22
 
 # Core requirements for lazy.nvim, treesitter, Mason LSPs, and Snacks picker
 sudo dnf install -y git gcc gcc-c++ make curl tar unzip gzip ripgrep fd-find nodejs npm python3 python3-pip
@@ -49,14 +53,18 @@ rm -f nvim-linux-x86_64.tar.gz
 nvim --version
 ```
 
-3. **`tree-sitter-cli` (required to build parsers on `nvim-treesitter` `main`):**
+3. **`tree-sitter-cli` *(optional on RHEL 9 — skip if you don't want Rust; Neovim degrades gracefully and built-in Lua/Markdown/Vim parsers still work)***:
+
+   If you want full Treesitter highlighting for YAML/Terraform/Bash/Dockerfile, compile `tree-sitter-cli` natively via Cargo for RHEL 9's `glibc 2.34`:
 
 ```bash
-sudo npm install -g tree-sitter-cli
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+cargo install --locked tree-sitter-cli
 tree-sitter --version
 ```
 
-*(Alternatively, download the prebuilt `tree-sitter-linux-x64.gz` binary from [tree-sitter releases](https://github.com/tree-sitter/tree-sitter/releases) into `/usr/local/bin/tree-sitter`.)*
+*(Make sure `~/.cargo/bin` is in your `$PATH`, e.g. via `source "$HOME/.cargo/env"` in `~/.bashrc`.)*
 
 4. **Optional DevOps / Ansible linters & formatters:**
 
@@ -84,10 +92,10 @@ git clone git@github.com:fikolis/nvim.git ~/.config/nvim
 git clone https://github.com/fikolis/nvim.git ~/.config/nvim
 ```
 
-Start Neovim (or sync plugins headlessly):
+Start Neovim (or install exact locked plugin versions headlessly — recommended on servers so `lazy-lock.json` stays clean):
 
 ```bash
-nvim --headless "+Lazy! sync" +qa
+nvim --headless "+Lazy! restore" +qa
 ```
 
 Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verify parsers, LSPs, `blink.cmp`, `snacks`, and `which-key`.
@@ -104,9 +112,10 @@ Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verif
     ├── init.lua            # Core autocmds, DevOps YAML filetypes, LspAttach keymaps
     ├── set.lua             # Editor options, 0.12 winborder/nohlsearch, 2-space DevOps indent
     ├── remap.lua           # Core motions, clipboard, tmux-sessionizer, builtin undotree
-    ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, grok, opencode, codex)
+    ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, claude, grok, opencode, codex)
     ├── lazy_init.lua       # lazy.nvim bootstrap & performance config
     └── lazy/
+        ├── ai_completion.lua # copilot.lua (GitHub Copilot Free) inline Tab completion
         ├── colors.lua      # rose-pine (transparent) + tokyonight (lazy)
         ├── completion.lua  # blink.cmp + friendly-snippets
         ├── formatting.lua  # conform.nvim
@@ -211,14 +220,19 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `ys`, `cs`, `ds` | Surround add / change / delete (`nvim-surround`) |
 | `gc` / `gcc` | Built-in comment operator / line |
 
-### AI CLI Floats (`Snacks.terminal`)
+### AI CLI Floats (`Snacks.terminal`) & Inline Tab Completion (`copilot.lua`)
 | Key | Action |
 |---|---|
 | `<leader>ca` | Toggle `agy` floating terminal |
+| `<leader>cc` | Toggle `claude` floating terminal |
 | `<leader>cg` | Toggle `grok` floating terminal |
 | `<leader>co` | Toggle `opencode` floating terminal |
 | `<leader>cx` | Toggle `codex` floating terminal |
 | `<C-q>` *(in float)* | Hide AI float without stopping the session (`q` also hides in normal mode) |
+| `<leader>ct` | Toggle Copilot inline Tab completion on/off (`:Copilot auth` on first run; never attaches to `.env`, vaults, secrets, keys, K8s `kind: Secret`) |
+| `<Tab>` *(insert)* | Accept Copilot ghost text (falls back to normal `<Tab>` when none is visible) |
+| `<C-j>` / `<A-a>` *(insert)* | Accept next word / line of Copilot suggestion |
+| `<A-]>` / `<A-[>` / `<C-]>` *(insert)* | Next / previous / dismiss Copilot suggestion |
 
 ### Tmux & Utilities
 | Key | Action |
@@ -234,10 +248,11 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 
 ## DevOps Language Support
 
-- **Custom YAML Filetypes** ([init.lua](lua/fikolis/init.lua)):
-  - `*/sysprep/*.y{a,}ml`, `*ansible*/*.y{a,}ml` → `yaml.ansible`
-  - `*ocp*/*.y{a,}ml`, `*/k8s/*.y{a,}ml`, `*/kubernetes/*.y{a,}ml` → `yaml.kubernetes`
-- **2-Space Indentation** ([set.lua](lua/fikolis/set.lua)): auto-applied to `yaml`, `yaml.ansible`, `yaml.kubernetes`, `json`, `jsonc`, `terraform`, `hcl`, `helm`.
-- **LSPs (Mason `ensure_installed`):** `lua_ls`, `rust_analyzer`, `powershell_es`, `bashls`, `yamlls` (+ `SchemaStore.nvim` & CloudFormation/GitLab `!reference` custom tags), `ansiblels`, `terraformls`, `dockerls`, `jsonls` (+ `SchemaStore.nvim`), `gopls`.
+- **Custom YAML & Template Filetypes** ([init.lua](lua/fikolis/init.lua)):
+  - `*.y{a,}ml.j2` → `yaml.jinja` (`priority = 20`, excluded from `yamlls`, `yamlfmt`, and `yamllint`), `*.j2` → `jinja`
+  - `*ocp*/*.y{a,}ml`, `*/k8s/*.y{a,}ml`, `*/kubernetes/*.y{a,}ml` → `yaml.kubernetes` (`priority = 10`, always wins over Ansible)
+  - `*/sysprep/*`, `*ansible*/*`, standard Ansible dirs (`playbooks/`, `roles/*/tasks|handlers|vars|defaults/`, `group_vars/`, `host_vars/`), or any YAML under a project with `ansible.cfg`/`.ansible-lint` → `yaml.ansible`
+- **2-Space Indentation** ([set.lua](lua/fikolis/set.lua)): auto-applied to `yaml`, `yaml.ansible`, `yaml.kubernetes`, `yaml.jinja`, `jinja`, `json`, `jsonc`, `terraform`, `hcl`, `helm`.
+- **LSPs (Mason `ensure_installed`):** `lua_ls`, `rust_analyzer`, `powershell_es`, `bashls`, `yamlls` (+ `SchemaStore.nvim`, Kubernetes schema for `yaml.kubernetes`, CloudFormation/GitLab `!reference` custom tags), `ansiblels` (auto-detects working Python & `ansible-lint`), `terraformls` (`terraform`, `terraform-vars`, `hcl`), `dockerls`, `jsonls` (+ `SchemaStore.nvim`), `gopls`.
 - **Formatters (`conform.nvim`):** `stylua`, `shfmt`, `yamlfmt`, `terraform_fmt`, `gofmt`, `prettier`.
-- **Linters (`nvim-lint`):** `shellcheck`, `hadolint`, `tflint`, `yamllint`, `ansible-lint` (only runs when executable is installed on `PATH`).
+- **Linters (`nvim-lint`):** `shellcheck`, `hadolint`, `tflint`, `yamllint` (`ansible-lint` runs directly via `ansiblels`).

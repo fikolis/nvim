@@ -32,6 +32,7 @@ end
 function M.setup()
     local tools = {
         { key = "<leader>ca", name = "agy", cmd = "agy" },
+        { key = "<leader>cc", name = "claude", cmd = "claude" },
         { key = "<leader>cg", name = "grok", cmd = "grok" },
         { key = "<leader>co", name = "opencode", cmd = "opencode" },
         { key = "<leader>cx", name = "codex", cmd = "codex" },
