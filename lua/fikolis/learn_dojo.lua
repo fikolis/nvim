@@ -1,16 +1,19 @@
--- Checker for learn_nvim.lua.
+-- Multi-game interactive Dojo checker (learning/learn_nvim.lua & learning/learn_nvim.yaml).
 -- Code goals read the play region (between IGRAJ OVDE and OCEKIVANI).
--- Key goals use vim.on_key's typed chord: the keys the user hit, not the
--- mapping expansion. Empty `typed` is the expansion itself and is ignored.
--- The buffer is `acwrite`, so :w never touches disk. ExitPre reloads the
--- file from disk so quitting does not prompt and does not save the exercise.
+-- Key goals use keymap hooks + vim.on_key's typed chord.
+-- The buffer is `acwrite`, so :w saves to the player's JSON save slot without touching disk.
+-- ExitPre auto-saves progress and restores disk text so quitting never dirties the repo.
 
 local M = {}
 
 local NS = vim.api.nvim_create_namespace("learn_dojo_marks")
 
+local GAMES = {}
+local GAMES_ORDER = { "core", "devops" }
+
 local state = {
     player = "default",
+    game = "core",
     players = {},
     actions = {},
     solved = {},
@@ -20,7 +23,7 @@ local state = {
     saved_lines = nil,
     announced = {},
     session = false,
-    greeted = false,
+    greeted = {},
     pausing = {},
     victory = {},
     armed = {},
@@ -69,14 +72,44 @@ local function make_empty_slot()
     }
 end
 
-local function apply_slot(name)
+local function ensure_player_record(name)
     local key = clean_player_name(name) or "default"
-    local slot = state.players[key]
-    if type(slot) ~= "table" then
-        slot = make_empty_slot()
-        state.players[key] = slot
+    local rec = state.players[key]
+    if type(rec) ~= "table" then
+        rec = { games = {} }
+        state.players[key] = rec
+    elseif type(rec.games) ~= "table" then
+        -- Migrate single-game player slot into games.core
+        local legacy = {
+            actions = type(rec.actions) == "table" and rec.actions or {},
+            solved = type(rec.solved) == "table" and rec.solved or {},
+            harpoon_files = type(rec.harpoon_files) == "table" and rec.harpoon_files or {},
+            ai_counts = type(rec.ai_counts) == "table" and rec.ai_counts or {},
+            runs = tonumber(rec.runs) or 0,
+            saved_at = rec.saved_at or os.date("%Y-%m-%d %H:%M"),
+            saved_lines = type(rec.saved_lines) == "table" and rec.saved_lines or nil,
+        }
+        rec = { games = { core = legacy } }
+        state.players[key] = rec
     end
+    return rec, key
+end
+
+local function get_player_game_slot(player_name, game_id)
+    local rec = ensure_player_record(player_name)
+    local gid = game_id or state.game or "core"
+    if type(rec.games[gid]) ~= "table" then
+        rec.games[gid] = make_empty_slot()
+    end
+    return rec.games[gid]
+end
+
+local function apply_slot(name, game_id)
+    local gid = game_id or state.game or "core"
+    local _, key = ensure_player_record(name)
+    local slot = get_player_game_slot(key, gid)
     state.player = key
+    state.game = gid
     state.actions = type(slot.actions) == "table" and vim.deepcopy(slot.actions) or {}
     state.solved = type(slot.solved) == "table" and vim.deepcopy(slot.solved) or {}
     state.harpoon_files = type(slot.harpoon_files) == "table" and vim.deepcopy(slot.harpoon_files) or {}
@@ -91,12 +124,13 @@ local function apply_slot(name)
 end
 
 local function sync_active_slot(buf_lines)
-    local key = clean_player_name(state.player) or "default"
+    local rec, key = ensure_player_record(state.player)
+    local gid = state.game or "core"
     state.player = key
     if buf_lines ~= nil then
         state.saved_lines = buf_lines and vim.deepcopy(buf_lines) or nil
     end
-    state.players[key] = {
+    rec.games[gid] = {
         actions = vim.deepcopy(state.actions),
         solved = vim.deepcopy(state.solved),
         harpoon_files = vim.deepcopy(state.harpoon_files),
@@ -115,6 +149,7 @@ local function write_store()
     end
     local payload = {
         active = state.player,
+        active_game = state.game,
         players = state.players,
     }
     vim.fn.writefile({ vim.json.encode(payload) }, path)
@@ -129,32 +164,40 @@ local function load_progress()
     local ok, lines = pcall(vim.fn.readfile, progress_path())
     if not ok or type(lines) ~= "table" or #lines == 0 then
         state.players = {}
-        apply_slot("default")
+        apply_slot("default", "core")
         return
     end
     local decoded_ok, decoded = pcall(vim.json.decode, table.concat(lines, "\n"))
     if not decoded_ok or type(decoded) ~= "table" then
         state.players = {}
-        apply_slot("default")
+        apply_slot("default", "core")
         return
     end
     if type(decoded.players) == "table" then
         state.players = decoded.players
+        for pname in pairs(state.players) do
+            ensure_player_record(pname)
+        end
         local active = clean_player_name(decoded.active) or "default"
-        apply_slot(active)
+        local gid = (type(decoded.active_game) == "string" and GAMES[decoded.active_game]) and decoded.active_game
+            or "core"
+        apply_slot(active, gid)
     else
-        -- Migrate legacy single-player save format into "default"
         state.players = {
             default = {
-                actions = type(decoded.actions) == "table" and decoded.actions or {},
-                solved = type(decoded.solved) == "table" and decoded.solved or {},
-                harpoon_files = type(decoded.harpoon_files) == "table" and decoded.harpoon_files or {},
-                ai_counts = type(decoded.ai_counts) == "table" and decoded.ai_counts or {},
-                runs = tonumber(decoded.runs) or 0,
-                saved_at = os.date("%Y-%m-%d %H:%M"),
+                games = {
+                    core = {
+                        actions = type(decoded.actions) == "table" and decoded.actions or {},
+                        solved = type(decoded.solved) == "table" and decoded.solved or {},
+                        harpoon_files = type(decoded.harpoon_files) == "table" and decoded.harpoon_files or {},
+                        ai_counts = type(decoded.ai_counts) == "table" and decoded.ai_counts or {},
+                        runs = tonumber(decoded.runs) or 0,
+                        saved_at = os.date("%Y-%m-%d %H:%M"),
+                    },
+                },
             },
         }
-        apply_slot("default")
+        apply_slot("default", "core")
     end
 end
 
@@ -178,17 +221,19 @@ local function sorted_player_names()
     return names
 end
 
-local function level_range(lines, level)
+local function level_range(lines, level, comment)
+    local p = comment or "%-%-"
     local tag = string.format("%02d", level)
     local start_i, end_i
     for i, line in ipairs(lines) do
-        if not start_i and line:match("^%-%- NIVO " .. tag .. "[^%d]") then
+        if not start_i and line:match("^" .. p .. " NIVO " .. tag .. "[^%d]") then
             start_i = i
         elseif
             start_i
             and (
-                line:match("^%-%- NIVO %d")
-                or line:match("^%-%- =====")
+                line:match("^" .. p .. " NIVO %d")
+                or line:match("^" .. p .. " =====")
+                or line:match("^%-%-%-%s*$")
                 or line:match("^%-%- Izvoz da Lua")
                 or line:match("^M%.refs%s*=")
             )
@@ -203,21 +248,22 @@ local function level_range(lines, level)
     return start_i, end_i or #lines
 end
 
-local function extract_play(lines, level)
-    local start_i, end_i = level_range(lines, level)
+local function extract_play(lines, level, comment)
+    local p = comment or "%-%-"
+    local start_i, end_i = level_range(lines, level, p)
     if not start_i then
         return ""
     end
     local from = start_i
     for i = start_i, end_i do
-        if lines[i]:match("^%-%- IGRAJ OVDE:") then
+        if lines[i]:match("^" .. p .. " IGRAJ OVDE:") then
             from = i + 1
             break
         end
     end
     local to = end_i
     for i = from, end_i do
-        if lines[i]:match("^%-%- OCEKIVANI") then
+        if lines[i]:match("^" .. p .. " OCEKIVANI") then
             to = i - 1
             break
         end
@@ -230,16 +276,18 @@ end
 
 local play_cache = setmetatable({}, { __mode = "k" })
 
-local function play(lines, level)
+local function play(lines, level, comment)
+    local p = comment or "%-%-"
     local cached = play_cache[lines]
     if not cached then
         cached = {}
         play_cache[lines] = cached
     end
-    if cached[level] == nil then
-        cached[level] = extract_play(lines, level)
+    local key = p .. ":" .. tostring(level)
+    if cached[key] == nil then
+        cached[key] = extract_play(lines, level, p)
     end
-    return cached[level]
+    return cached[key]
 end
 
 local function oneline(text, pat)
@@ -952,14 +1000,35 @@ local function define_hl()
     vim.api.nvim_set_hl(0, "DojoPending", { fg = "#6c7086" })
 end
 
-local function dojo_bufs()
+local function dojo_bufs(game_id)
     local list = {}
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.b[buf].learn_dojo and vim.api.nvim_buf_is_loaded(buf) then
+        local gid = vim.b[buf].learn_dojo
+        if gid and vim.api.nvim_buf_is_loaded(buf) and (not game_id or gid == game_id) then
             list[#list + 1] = buf
         end
     end
     return list
+end
+
+local function detect_game_id(name)
+    local tail = vim.fn.fnamemodify(name or "", ":t")
+    for _, gid in ipairs(GAMES_ORDER) do
+        if GAMES[gid] and GAMES[gid].file == tail then
+            return gid
+        end
+    end
+    return nil
+end
+
+local function active_game(buf)
+    if buf and vim.api.nvim_buf_is_valid(buf) then
+        local gid = vim.b[buf].learn_dojo
+        if type(gid) == "string" and GAMES[gid] then
+            return GAMES[gid]
+        end
+    end
+    return GAMES[state.game] or GAMES.core
 end
 
 local function current_dojo()
@@ -967,18 +1036,41 @@ local function current_dojo()
     if vim.b[buf].learn_dojo then
         return buf
     end
-    return dojo_bufs()[1]
+    return dojo_bufs(state.game)[1] or dojo_bufs()[1]
 end
 
 local function dojo_current()
-    return vim.b[vim.api.nvim_get_current_buf()].learn_dojo == true
+    return vim.b[vim.api.nvim_get_current_buf()].learn_dojo ~= nil
+end
+
+local function ensure_game_for_buf(buf)
+    if not buf or not vim.api.nvim_buf_is_valid(buf) then
+        return nil
+    end
+    local gid = vim.b[buf].learn_dojo
+    if type(gid) ~= "string" or not GAMES[gid] then
+        return nil
+    end
+    if state.game ~= gid then
+        local prev_buf = dojo_bufs(state.game)[1]
+        if prev_buf and vim.api.nvim_buf_is_valid(prev_buf) then
+            sync_active_slot(vim.api.nvim_buf_get_lines(prev_buf, 0, -1, false))
+        else
+            sync_active_slot()
+        end
+        apply_slot(state.player, gid)
+        write_store()
+    end
+    return GAMES[gid]
 end
 
 local function section_at(buf, lnum)
+    local game = active_game(buf)
+    local p = game and game.comment or "%-%-"
     local lines = vim.api.nvim_buf_get_lines(buf, 0, lnum, false)
     local current
     for _, line in ipairs(lines) do
-        local n = line:match("^%-%- NIVO (%d+)")
+        local n = line:match("^" .. p .. " NIVO (%d+)")
         if n then
             current = tonumber(n)
         end
@@ -994,14 +1086,16 @@ local function section_now()
     return section_at(buf, vim.api.nvim_win_get_cursor(0)[1])
 end
 
-function M.evaluate(lines, ctx)
+function M.evaluate(lines, ctx, game_id)
     ctx = ctx or state
     ctx.actions = ctx.actions or {}
     ctx.solved = ctx.solved or {}
     ctx.harpoon_files = ctx.harpoon_files or {}
+    local game = GAMES[game_id or state.game] or GAMES.core
+    local levels = game.levels
     local results = {}
     local done_n = 0
-    for _, level in ipairs(LEVELS) do
+    for _, level in ipairs(levels) do
         local total = #level.goals
         local have = 0
         local missing = {}
@@ -1117,13 +1211,15 @@ end
 
 local function draw_marks(buf, lines, results)
     vim.api.nvim_buf_clear_namespace(buf, NS, 0, -1)
+    local game = active_game(buf)
+    local p = game and game.comment or "%-%-"
     local by_id = result_map(results)
     local cur_steps = nil
     local cur_line_groups = nil
     local in_play = false
 
     for i, line in ipairs(lines) do
-        local n = line:match("^%-%- NIVO (%d+)")
+        local n = line:match("^" .. p .. " NIVO (%d+)")
         if n then
             local cur_result = by_id[tonumber(n)]
             cur_steps = nil
@@ -1176,14 +1272,14 @@ local function draw_marks(buf, lines, results)
                     cur_line_groups = line_groups
                 end
             end
-        elseif line:match("^%-%- IGRAJ OVDE:") then
+        elseif line:match("^" .. p .. " IGRAJ OVDE:") then
             cur_steps = nil
             in_play = true
-        elseif line:match("^%-%- OCEKIVANI") or line:match("^%-%- =====") then
+        elseif line:match("^" .. p .. " OCEKIVANI") or line:match("^" .. p .. " =====") or line:match("^%-%-%-%s*$") then
             cur_steps = nil
             in_play = false
-        elseif cur_steps and line:match("^%-%-") then
-            local step_num = tonumber(line:match("^%-%-%s+(%d+)%.%s"))
+        elseif cur_steps and line:match("^" .. p) then
+            local step_num = tonumber(line:match("^" .. p .. "%s+(%d+)%.%s"))
             local group_goals = step_num and cur_steps[step_num]
             if group_goals then
                 cur_steps[step_num] = nil
@@ -1202,6 +1298,8 @@ local function draw_marks(buf, lines, results)
 end
 
 local function paint_winbar(buf, results, done_n)
+    local game = active_game(buf)
+    local total_levels = #game.levels
     local section
     if vim.api.nvim_get_current_buf() == buf then
         section = section_at(buf, vim.api.nvim_win_get_cursor(0)[1])
@@ -1233,7 +1331,7 @@ local function paint_winbar(buf, results, done_n)
     end
     local runs = (state.runs or 0) > 0 and ("  runda " .. state.runs) or ""
     local player = (state.player or "default"):gsub("%%", "%%%%")
-    local bar = string.format("%%#DojoDone# DOJO [%s] %d/33%s%s", player, done_n, runs, extra)
+    local bar = string.format("%%#DojoDone# DOJO [%s] %d/%d%s%s", player, done_n, total_levels, runs, extra)
     for _, win in ipairs(vim.api.nvim_list_wins()) do
         if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == buf then
             pcall(vim.api.nvim_set_option_value, "winbar", bar, { win = win })
@@ -1280,13 +1378,15 @@ end
 local refresh
 
 local function maybe_victory(buf, results, done_n)
-    if done_n ~= #LEVELS or state.victory[buf] or state.pausing[buf] then
+    local game = active_game(buf)
+    local total = #game.levels
+    if done_n ~= total or state.victory[buf] or state.pausing[buf] then
         return
     end
     state.victory[buf] = true
     state.pausing[buf] = true
     vim.bo[buf].modifiable = false
-    vim.notify("Sve 33 vezbe su gotove. Fajl se vraca na pocetak.", vim.log.levels.INFO)
+    vim.notify(string.format("Sve %d vezbe su gotove (%s). Fajl se vraca na pocetak.", total, game.title), vim.log.levels.INFO)
     vim.defer_fn(function()
         if not vim.api.nvim_buf_is_valid(buf) then
             return
@@ -1316,8 +1416,10 @@ refresh = function(buf, announce)
     if not vim.api.nvim_buf_is_valid(buf) or state.pausing[buf] then
         return
     end
+    local game = ensure_game_for_buf(buf) or active_game(buf)
+    local total = #game.levels
     local cursor_changed = false
-    if vim.api.nvim_get_current_buf() == buf then
+    if game.id == "core" and vim.api.nvim_get_current_buf() == buf then
         local row = vim.api.nvim_win_get_cursor(0)[1]
         local near = vim.api.nvim_buf_get_lines(buf, math.max(0, row - 1), row + 1, false)
         local joined = table.concat(near, "\n")
@@ -1334,7 +1436,7 @@ refresh = function(buf, announce)
     end
 
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local results, done_n = M.evaluate(lines, state)
+    local results, done_n = M.evaluate(lines, state, game.id)
     local solved_changed = false
     for _, result in ipairs(results) do
         local key = tostring(result.id)
@@ -1355,8 +1457,6 @@ refresh = function(buf, announce)
 
     if not state.armed[buf] then
         state.armed[buf] = true
-        -- Opening the file must not toast progress that was already saved.
-        -- A real solve on that first pass still announces below.
         if not announce then
             for _, result in ipairs(results) do
                 if result.done then
@@ -1373,7 +1473,7 @@ refresh = function(buf, announce)
                 state.announced[result.id] = true
                 if announce then
                     vim.notify(
-                        string.format("Nivo %02d gotov (%d/33) — %s", result.id, done_n, result.title),
+                        string.format("Nivo %02d gotov (%d/%d) — %s", result.id, done_n, total, result.title),
                         vim.log.levels.INFO
                     )
                 end
@@ -1418,7 +1518,7 @@ local function touch()
     vim.schedule(function()
         scheduled_touch = false
         save_progress()
-        for _, buf in ipairs(dojo_bufs()) do
+        for _, buf in ipairs(dojo_bufs(state.game)) do
             refresh(buf, true)
         end
     end)
@@ -1435,7 +1535,7 @@ end
 local last_handled = {}
 
 local function handle(token, mode)
-    if not state.session or token == nil or token == "" then
+    if not state.session or state.game ~= "core" or token == nil or token == "" then
         return
     end
     if mode:sub(1, 2) == "no" or mode:sub(1, 1) == "c" then
@@ -1600,14 +1700,17 @@ end
 
 local function attach(buf)
     local name = vim.api.nvim_buf_get_name(buf)
-    if vim.fn.fnamemodify(name, ":t") ~= "learn_nvim.lua" then
+    local gid = detect_game_id(name)
+    if not gid then
         return
     end
     if vim.b[buf].learn_dojo then
+        ensure_game_for_buf(buf)
         return
     end
-    vim.b[buf].learn_dojo = true
+    vim.b[buf].learn_dojo = gid
     state.session = true
+    local game = ensure_game_for_buf(buf) or GAMES[gid]
     vim.bo[buf].buftype = "acwrite"
     if type(state.saved_lines) == "table" and #state.saved_lines > 10 then
         apply_buffer_lines(buf, state.saved_lines)
@@ -1649,15 +1752,17 @@ local function attach(buf)
         vim.notify("Dojo fajl se ne source-uje.", vim.log.levels.WARN)
     end, { buffer = buf, desc = "Dojo: ne source-uj ovaj fajl" })
 
-    if not state.greeted then
-        state.greeted = true
+    if not state.greeted[gid] then
+        state.greeted[gid] = true
         vim.schedule(function()
             local solved_n = count_solved({ solved = state.solved })
             vim.notify(
                 string.format(
-                    "Learn dojo [%s] %d/33 — :DojoNew, :DojoSave (ili :w), :DojoLoad, :DojoNext",
+                    "Dojo [%s] %s (%d/%d) — :DojoGames, :DojoNew, :DojoSave (ili :w), :DojoLoad, :DojoNext",
                     state.player or "default",
-                    solved_n
+                    game.title,
+                    solved_n,
+                    #game.levels
                 ),
                 vim.log.levels.INFO
             )
@@ -1679,16 +1784,19 @@ end
 function M.status()
     local buf = current_dojo()
     if not buf then
-        vim.notify("Otvori learn_nvim.lua, pa ponovo :Dojo.", vim.log.levels.WARN)
+        vim.notify("Otvori learning/learn_nvim.lua ili learning/learn_nvim.yaml (ili :DojoGames).", vim.log.levels.WARN)
         return
     end
+    local game = ensure_game_for_buf(buf) or active_game(buf)
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local results, done_n = M.evaluate(lines, state)
+    local results, done_n = M.evaluate(lines, state, game.id)
     local out = {
         string.format(
-            "Dojo [%s] %d/33    zavrsenih rundi: %d    igraca: %d",
+            "Dojo [%s] %s  %d/%d    rundi: %d    igraca: %d",
             state.player or "default",
+            game.title,
             done_n,
+            #game.levels,
             state.runs or 0,
             #sorted_player_names()
         ),
@@ -1713,12 +1821,13 @@ end
 function M.next()
     local buf = current_dojo()
     if not buf then
-        vim.notify("Otvori learn_nvim.lua.", vim.log.levels.WARN)
+        vim.notify("Otvori igru sa :DojoGames.", vim.log.levels.WARN)
         return
     end
     focus_dojo(buf)
+    local game = ensure_game_for_buf(buf) or active_game(buf)
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local results = M.evaluate(lines, state)
+    local results = M.evaluate(lines, state, game.id)
     local target
     for _, result in ipairs(results) do
         if not result.done then
@@ -1731,8 +1840,9 @@ function M.next()
         return
     end
     local tag = string.format("%02d", target)
+    local p = game.comment or "%-%-"
     for i, line in ipairs(lines) do
-        if line:match("^%-%- NIVO " .. tag .. "[^%d]") then
+        if line:match("^" .. p .. " NIVO " .. tag .. "[^%d]") then
             vim.api.nvim_win_set_cursor(0, { i, 0 })
             vim.cmd("normal! zz")
             refresh(buf, false)
@@ -1744,9 +1854,10 @@ end
 function M.reset_text()
     local buf = current_dojo()
     if not buf then
-        vim.notify("Otvori learn_nvim.lua.", vim.log.levels.WARN)
+        vim.notify("Otvori igru sa :DojoGames.", vim.log.levels.WARN)
         return
     end
+    ensure_game_for_buf(buf)
     restore_buf(buf)
     state.saved_lines = nil
     save_progress(false)
@@ -1755,19 +1866,95 @@ function M.reset_text()
     vim.notify("Tekst dojo fajla je vracen na disk verziju. Sacuvani napredak ostaje.", vim.log.levels.INFO)
 end
 
+local function resolve_game_path(game)
+    local candidates = {
+        vim.fn.getcwd() .. "/" .. game.rel,
+        vim.fn.stdpath("config") .. "/" .. game.rel,
+        vim.fn.getcwd() .. "/" .. game.file,
+        vim.fn.stdpath("config") .. "/" .. game.file,
+    }
+    for _, path in ipairs(candidates) do
+        if vim.fn.filereadable(path) == 1 then
+            return path
+        end
+    end
+    return vim.fn.stdpath("config") .. "/" .. game.rel
+end
+
+function M.games(target)
+    local function open_game(gid)
+        local game = GAMES[gid]
+        if not game then
+            vim.notify("Nepoznata igra: " .. tostring(gid), vim.log.levels.WARN)
+            return
+        end
+        local path = resolve_game_path(game)
+        if vim.fn.filereadable(path) ~= 1 then
+            vim.notify("Fajl igre nije pronadjen: " .. path, vim.log.levels.WARN)
+            return
+        end
+        local cur = current_dojo()
+        if cur and vim.b[cur].learn_dojo and vim.b[cur].learn_dojo ~= gid then
+            save_progress(vim.api.nvim_buf_get_lines(cur, 0, -1, false))
+        end
+        vim.cmd("edit " .. vim.fn.fnameescape(path))
+        local buf = vim.api.nvim_get_current_buf()
+        attach(buf)
+        refresh(buf, false)
+        M.next()
+    end
+
+    local clean = clean_player_name(target)
+    if clean then
+        open_game(clean)
+        return
+    end
+
+    local items = {}
+    for _, gid in ipairs(GAMES_ORDER) do
+        local g = GAMES[gid]
+        if g then
+            local slot = get_player_game_slot(state.player, gid)
+            items[#items + 1] = { game = g, solved = count_solved(slot), runs = tonumber(slot.runs) or 0 }
+        end
+    end
+
+    vim.ui.select(items, {
+        prompt = string.format("Dojo igre [%s]:", state.player or "default"),
+        format_item = function(item)
+            local g = item.game
+            local mark = (g.id == state.game) and "* " or "  "
+            return string.format(
+                "%s%-26s %2d/%-2d   rundi: %d   (%s)",
+                mark,
+                g.title,
+                item.solved,
+                #g.levels,
+                item.runs,
+                g.rel
+            )
+        end,
+    }, function(choice)
+        if choice then
+            open_game(choice.game.id)
+        end
+    end)
+end
+
 local function do_new_game(name)
     local clean = clean_player_name(name)
     if not clean then
         return
     end
     local buf = current_dojo()
+    local game = (buf and ensure_game_for_buf(buf)) or active_game(buf)
     if buf and state.player and state.player ~= clean then
-        -- Auto-save previous player's state before starting a new player
         local prev_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
         save_progress(prev_lines)
     end
-    state.players[clean] = make_empty_slot()
-    apply_slot(clean)
+    local rec = ensure_player_record(clean)
+    rec.games[game.id] = make_empty_slot()
+    apply_slot(clean, game.id)
     if buf then
         restore_buf(buf)
         state.seen_fp[buf] = nil
@@ -1777,7 +1964,7 @@ local function do_new_game(name)
         refresh(buf, false)
         M.next()
     end
-    vim.notify(string.format("New Game: '%s' (0/33).", clean), vim.log.levels.INFO)
+    vim.notify(string.format("New Game: '%s' — %s (0/%d).", clean, game.title, #game.levels), vim.log.levels.INFO)
 end
 
 function M.new_game(name)
@@ -1798,21 +1985,22 @@ end
 function M.save_game(name)
     local buf = current_dojo()
     if not buf then
-        vim.notify("Otvori learn_nvim.lua.", vim.log.levels.WARN)
+        vim.notify("Otvori igru sa :DojoGames.", vim.log.levels.WARN)
         return
     end
+    local game = ensure_game_for_buf(buf) or active_game(buf)
     local clean = clean_player_name(name)
     if clean then
         state.player = clean
     end
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local _, done_n = M.evaluate(lines, state)
+    local _, done_n = M.evaluate(lines, state, game.id)
     save_progress(lines)
     vim.bo[buf].modified = false
     state.seen_fp[buf] = nil
     refresh(buf, false)
     vim.notify(
-        string.format("Save Game: '%s' (%d/33) sacuvan.", state.player, done_n),
+        string.format("Save Game: '%s' — %s (%d/%d) sacuvan.", state.player, game.title, done_n, #game.levels),
         vim.log.levels.INFO
     )
 end
@@ -1830,11 +2018,12 @@ local function do_load_game(name)
         return
     end
     local buf = current_dojo()
+    local game = (buf and ensure_game_for_buf(buf)) or active_game(buf)
     if buf and state.player and state.player ~= clean then
         local prev_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
         save_progress(prev_lines)
     end
-    apply_slot(clean)
+    apply_slot(clean, game.id)
     write_store()
     if buf then
         if type(state.saved_lines) == "table" and #state.saved_lines > 10 then
@@ -1848,7 +2037,7 @@ local function do_load_game(name)
     end
     local solved_n = count_solved({ solved = state.solved })
     vim.notify(
-        string.format("Load Game: '%s' (%d/33, rundi: %d).", clean, solved_n, state.runs or 0),
+        string.format("Load Game: '%s' — %s (%d/%d, rundi: %d).", clean, game.title, solved_n, #game.levels, state.runs or 0),
         vim.log.levels.INFO
     )
 end
@@ -1859,15 +2048,17 @@ function M.load_game(name)
         do_load_game(clean)
         return
     end
+    local buf = current_dojo()
+    local game = (buf and ensure_game_for_buf(buf)) or active_game(buf)
     local names = sorted_player_names()
     local items = {}
     for _, n in ipairs(names) do
-        items[#items + 1] = { kind = "player", name = n, slot = state.players[n] }
+        items[#items + 1] = { kind = "player", name = n, slot = get_player_game_slot(n, game.id) }
     end
     items[#items + 1] = { kind = "new" }
 
     vim.ui.select(items, {
-        prompt = "Dojo — izaberi igraca (Load / New Game):",
+        prompt = string.format("Dojo (%s) — izaberi igraca:", game.title),
         format_item = function(item)
             if item.kind == "new" then
                 return "+ New Game (novi igrac)..."
@@ -1876,7 +2067,7 @@ function M.load_game(name)
             local solved_n = count_solved(item.slot)
             local runs = tonumber(item.slot and item.slot.runs) or 0
             local when = (item.slot and item.slot.saved_at) or ""
-            return string.format("%s%-14s %2d/33   rundi: %d   %s", mark, item.name, solved_n, runs, when)
+            return string.format("%s%-14s %2d/%-2d   rundi: %d   %s", mark, item.name, solved_n, #game.levels, runs, when)
         end,
     }, function(choice)
         if not choice then
@@ -1899,10 +2090,11 @@ function M.delete_game(name)
         end
         state.players[clean] = nil
         local buf = current_dojo()
+        local game = active_game(buf)
         if state.player == clean then
             local remaining = sorted_player_names()
             local next_player = remaining[1] or "default"
-            apply_slot(next_player)
+            apply_slot(next_player, game.id)
             if buf then
                 if type(state.saved_lines) == "table" and #state.saved_lines > 10 then
                     apply_buffer_lines(buf, state.saved_lines)
@@ -1939,17 +2131,18 @@ end
 function M.reset_level(target)
     local buf = current_dojo()
     if not buf then
-        vim.notify("Otvori learn_nvim.lua.", vim.log.levels.WARN)
+        vim.notify("Otvori igru sa :DojoGames.", vim.log.levels.WARN)
         return
     end
+    local game = ensure_game_for_buf(buf) or active_game(buf)
     local level_id = tonumber(target)
     if not level_id then
         if vim.api.nvim_get_current_buf() == buf then
             level_id = section_at(buf, vim.api.nvim_win_get_cursor(0)[1])
         end
     end
-    if not level_id or level_id < 1 or level_id > #LEVELS then
-        vim.notify("Stani unutar nekog nivoa ili zadaj broj (npr. :DojoResetLevel 18).", vim.log.levels.WARN)
+    if not level_id or level_id < 1 or level_id > #game.levels then
+        vim.notify("Stani unutar nekog nivoa ili zadaj broj (npr. :DojoResetLevel 5).", vim.log.levels.WARN)
         return
     end
 
@@ -1959,8 +2152,8 @@ function M.reset_level(target)
     end
     local disk_lines = vim.fn.readfile(name)
     local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local ds, de = level_range(disk_lines, level_id)
-    local bs, be = level_range(buf_lines, level_id)
+    local ds, de = level_range(disk_lines, level_id, game.comment)
+    local bs, be = level_range(buf_lines, level_id, game.comment)
     if not ds or not bs then
         vim.notify(string.format("Nivo %02d nije pronadjen u fajlu.", level_id), vim.log.levels.WARN)
         return
@@ -1979,10 +2172,12 @@ function M.reset_level(target)
             state.actions[key] = nil
         end
     end
-    if level_id == 23 then
-        state.harpoon_files = {}
-    elseif level_id == 30 then
-        state.ai_counts = {}
+    if game.id == "core" then
+        if level_id == 23 then
+            state.harpoon_files = {}
+        elseif level_id == 30 then
+            state.ai_counts = {}
+        end
     end
     state.solved[tostring(level_id)] = nil
     state.announced[level_id] = nil
@@ -1996,6 +2191,7 @@ end
 function M.reset_all()
     local buf = current_dojo()
     if buf then
+        ensure_game_for_buf(buf)
         restore_buf(buf)
         state.seen_fp[buf] = nil
     end
@@ -2006,18 +2202,73 @@ function M.reset_all()
     vim.notify("Dojo je vracen na pocetak. Napredak i runde su obrisani.", vim.log.levels.INFO)
 end
 
+local function check_oil(buf)
+    if not state.session or state.game ~= "core" then
+        return
+    end
+    if not buf or not vim.api.nvim_buf_is_valid(buf) then
+        return
+    end
+    local name = vim.api.nvim_buf_get_name(buf):gsub("\\", "/")
+    local is_oil = vim.bo[buf].filetype == "oil" or name:match("^oil://") ~= nil
+    if not is_oil then
+        return
+    end
+    local changed = mark_action("22:oil")
+    local dir = name:gsub("^oil://", "")
+    local ok, oil = pcall(require, "oil")
+    if ok and type(oil.get_current_dir) == "function" then
+        local got = oil.get_current_dir(buf)
+        if type(got) == "string" and got ~= "" then
+            dir = got
+        end
+    end
+    dir = dir:gsub("\\", "/"):gsub("/+$", "")
+    if dir:match("lua/fikolis/lazy$") or dir:match("lua/fikolis/lazy/") then
+        changed = mark_action("22:lazy") or changed
+    end
+    if changed then
+        touch()
+    end
+end
+
 function M.setup()
     if M._ready then
         return
     end
     M._ready = true
+    GAMES.core = {
+        id = "core",
+        file = "learn_nvim.lua",
+        rel = "learning/learn_nvim.lua",
+        title = "Neovim Core (Lua)",
+        comment = "%-%-",
+        levels = LEVELS,
+    }
+    local yaml_builder = require("fikolis.learn_yaml_levels")
+    GAMES.devops = {
+        id = "devops",
+        file = "learn_nvim.yaml",
+        rel = "learning/learn_nvim.yaml",
+        title = "DevOps (Ansible & K8s)",
+        comment = "#",
+        levels = yaml_builder({
+            play = function(lines, level)
+                return play(lines, level, "#")
+            end,
+            oneline = oneline,
+            ordered_lines = ordered_lines,
+            count_plain = count_plain,
+            code = code,
+        }),
+    }
     load_progress()
     define_hl()
 
     local group = vim.api.nvim_create_augroup("LearnDojo", { clear = true })
     vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufWinEnter" }, {
         group = group,
-        pattern = "*learn_nvim.lua",
+        pattern = { "*learn_nvim.lua", "*learn_nvim.yaml" },
         callback = function(ev)
             attach(ev.buf)
             if vim.b[ev.buf].learn_dojo then
@@ -2033,6 +2284,7 @@ function M.setup()
         group = group,
         callback = function()
             for _, buf in ipairs(dojo_bufs()) do
+                ensure_game_for_buf(buf)
                 if not state.victory[buf] then
                     local cur_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
                     save_progress(cur_lines)
@@ -2049,7 +2301,7 @@ function M.setup()
     vim.api.nvim_create_autocmd("CmdlineLeave", {
         group = group,
         callback = function()
-            if not state.session or not dojo_current() then
+            if not state.session or state.game ~= "core" or not dojo_current() then
                 return
             end
             local kind = vim.fn.getcmdtype()
@@ -2065,7 +2317,7 @@ function M.setup()
     vim.api.nvim_create_autocmd("TextYankPost", {
         group = group,
         callback = function()
-            if not state.session or not dojo_current() or section_now() ~= 8 then
+            if not state.session or state.game ~= "core" or not dojo_current() or section_now() ~= 8 then
                 return
             end
             if vim.v.event.regname ~= "+" then
@@ -2084,30 +2336,36 @@ function M.setup()
             if not state.session then
                 return
             end
+            if vim.b[ev.buf].learn_dojo then
+                ensure_game_for_buf(ev.buf)
+            end
             wrap_keymaps(ev.buf)
             local name = vim.api.nvim_buf_get_name(ev.buf):gsub("\\", "/")
-            if name:match("/ai%.lua$") or name:match("^ai%.lua$") then
-                if state.actions["20:pf"] and mark_action("20:ai") then
-                    touch()
-                end
-            end
-            if vim.bo[ev.buf].filetype == "oil" then
-                local dir = name
-                local ok, oil = pcall(require, "oil")
-                if ok and type(oil.get_current_dir) == "function" then
-                    local got = oil.get_current_dir(ev.buf)
-                    if type(got) == "string" and got ~= "" then
-                        dir = got
+            if state.game == "core" then
+                if name:match("/ai%.lua$") or name:match("^ai%.lua$") then
+                    if state.actions["20:pf"] and mark_action("20:ai") then
+                        touch()
                     end
                 end
-                dir = dir:gsub("\\", "/"):gsub("/+$", "")
-                if (dir:match("lua/fikolis/lazy$") or dir:match("lua/fikolis/lazy/")) and mark_action("22:lazy") then
+                check_oil(ev.buf)
+                if vim.b[ev.buf].learn_dojo == "core" and state.actions["22:oil"] and mark_action("22:back") then
                     touch()
                 end
             end
-            if vim.b[ev.buf].learn_dojo and state.actions["22:oil"] and mark_action("22:back") then
-                touch()
-            end
+        end,
+    })
+    vim.api.nvim_create_autocmd("FileType", {
+        group = group,
+        pattern = "oil",
+        callback = function(ev)
+            check_oil(ev.buf)
+        end,
+    })
+    vim.api.nvim_create_autocmd("User", {
+        group = group,
+        pattern = "OilEnter",
+        callback = function()
+            check_oil(vim.api.nvim_get_current_buf())
         end,
     })
     vim.api.nvim_create_autocmd({ "LspAttach" }, {
@@ -2144,7 +2402,20 @@ function M.setup()
         return out
     end
 
+    local function complete_games(arg_lead)
+        local out = {}
+        for _, gid in ipairs(GAMES_ORDER) do
+            if gid:sub(1, #arg_lead) == arg_lead then
+                out[#out + 1] = gid
+            end
+        end
+        return out
+    end
+
     vim.api.nvim_create_user_command("Dojo", M.status, { desc = "Learn dojo: status svih nivoa" })
+    vim.api.nvim_create_user_command("DojoGames", function(opts)
+        M.games(opts.args ~= "" and opts.args or nil)
+    end, { nargs = "?", complete = complete_games, desc = "Learn dojo: izaberi igru (Lua Core / DevOps YAML)" })
     vim.api.nvim_create_user_command("DojoNext", M.next, { desc = "Learn dojo: skoci na prvi nedovrsen nivo" })
     vim.api.nvim_create_user_command("DojoNew", function(opts)
         M.new_game(opts.args ~= "" and opts.args or nil)

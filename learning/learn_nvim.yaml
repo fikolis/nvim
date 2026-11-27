@@ -1,0 +1,584 @@
+# ============================================================================
+#  NEOVIM DEVOPS DOJO — 20 NIVOA (KUBERNETES & ANSIBLE ZA TVOJ CONFIG)
+# ============================================================================
+#  Kako se igra:
+#    1. Otvori ovaj fajl: `nvim learning/learn_nvim.yaml`
+#    2. Radi nivoe redom (ili skoci: `/NIVO 11`, ili `:DojoNext`).
+#    3. Provera je automatska. Svaki red i korak dobija `[ ]` -> `✓`.
+#       Winbar na vrhu pokazuje igraca, skor i sta jos fali.
+#    4. `:DojoGames` menja igru (Lua Core 33 nivoa <-> DevOps YAML 20 nivoa).
+#    5. Vise igraca (Save / New / Load Game):
+#         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/20)
+#         - `:DojoSave [ime]` (ili `:w`) = Save Game (cuva napredak + YAML)
+#         - `:DojoLoad [ime]` (ili `:DojoContinue`) = izaberi igraca i nastavi
+#         - `:DojoDelete [ime]` = obrisi sacuvanog igraca
+#    6. `:DojoReset` vraca tekst sa diska. `:DojoResetLevel [N]` vraca jedan nivo.
+#       `:DojoResetAll` brise napredak i runde za ovu igru.
+#    7. Leader je <Space>. Podsetnik: `<leader>?`. Undo: `u` / `<leader>u`.
+# ============================================================================
+
+---
+# ============================================================================
+#  TIER 1: KUBERNETES OSNOVE — Brojevi, Vrednosti, Komentari, Redosled (1-5)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 01 / 20 — K8s Deployment Scale & Image Bump
+# Precice: 2<C-a> (povecaj broj)  |  ci" / f:  |  ciw
+# ZADATAK:
+#   1. Stani na `1` u `replicas: 1` i povecaj na `3` pomocu `2<C-a>`.
+#   2. Promeni tag slike `nginx:1.25` u `nginx:1.27` (npr. `f5r7` ili `2<C-a>`).
+#   3. Promeni `imagePullPolicy: Always` u `IfNotPresent` pomocu `ciw`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-frontend
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: nginx
+          image: "nginx:1.25"
+          imagePullPolicy: Always
+# OCEKIVANI REZULTAT:
+#   replicas: 3
+#   image: "nginx:1.27"
+#   imagePullPolicy: IfNotPresent
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 02 / 20 — K8s Env Vars: Paste bez gubitka yanka
+# Precice: yi"  |  vi"<leader>p  (`"_dP` u Visual modu)
+# ZADATAK:
+#   1. Kopiraj `"production"` iz `CLUSTER_ENV` pomocu `yi"`.
+#   2. Pregazi `"dev"`, `"staging"` i `"local"` sa `vi"<leader>p` — BEZ
+#      ponovnog kopiranja!
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-defaults
+data:
+  CLUSTER_ENV: "production"
+  APP_ENV: "dev"
+  LOG_ENV: "staging"
+  METRICS_ENV: "local"
+# OCEKIVANI REZULTAT:
+#   APP_ENV: "production"
+#   LOG_ENV: "production"
+#   METRICS_ENV: "production"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 03 / 20 — K8s Probes & Komentari (`gcc` / `gc`)
+# Precice: gcc (jedna linija)  |  V2jgc (blok od 3 linije)
+# ZADATAK:
+#   1. Zakomentarisi debug port `containerPort: 9999` pomocu `gcc`.
+#   2. Otkomentarisi sve 3 linije `readinessProbe` odjednom (`V2jgc` ili `gc2j`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          ports:
+            - containerPort: 8080
+            - containerPort: 9999
+          # readinessProbe:
+          #   httpGet:
+          #     path: /healthz
+# OCEKIVANI REZULTAT:
+#   # - containerPort: 9999
+#   readinessProbe:
+#     httpGet:
+#       path: /healthz
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 04 / 20 — K8s InitContainers Redosled (`V` + `J` / `K`)
+# Precice: V (Visual Line)  |  J (dole)  |  K (gore)
+# ZADATAK: Poredjaj korake startovanja u `args:` od 1 do 4 pomocu `V` i `J`/`K`!
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-migrator
+spec:
+  containers:
+    - name: init
+      args:
+        - "3. seed-cache"
+        - "1. wait-for-db"
+        - "4. warm-up"
+        - "2. run-migrations"
+# OCEKIVANI REZULTAT:
+#         - "1. wait-for-db"
+#         - "2. run-migrations"
+#         - "3. seed-cache"
+#         - "4. warm-up"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 05 / 20 — K8s Namespace Zamena svuda (`<leader>s`)
+# Precice: <leader>s  (`:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI`)
+# ZADATAK: Stani na `legacy_ns_05`, pritisni `<leader>s`, ukucaj `prod_payments`
+#          i pritisni `<Enter>` da promenis sve 4 pojave odjednom!
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-svc
+  namespace: legacy_ns_05
+  labels:
+    owner-ns: legacy_ns_05
+spec:
+  externalName: db.legacy_ns_05.svc.cluster.local
+  selector:
+    ns: legacy_ns_05
+# OCEKIVANI REZULTAT: Sve 4 pojave su `prod_payments`.
+
+---
+# ============================================================================
+#  TIER 2: KUBERNETES NAPREDNO — Surround, Void Delete, Indent, Hardening (6-10)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 06 / 20 — K8s ConfigMap Surround (`ys`, `cs`, `ds`)
+# Precice: ysiw"  |  cs'"  |  ds)
+# ZADATAK:
+#   1. Stavi `eu_central` u duple navodnike (`ysiw"`) -> `"eu_central"`.
+#   2. Promeni `'8080'` u `"8080"` pomocu `cs'"`.
+#   3. Skini visak zagrada oko `("30s")` pomocu `ds)` -> `"30s"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-settings
+data:
+  REGION: eu_central
+  PORT: '8080'
+  TIMEOUT: ("30s")
+# OCEKIVANI REZULTAT:
+#   REGION: "eu_central"
+#   PORT: "8080"
+#   TIMEOUT: "30s"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 07 / 20 — K8s Resources Void Delete (`yi"`, `<leader>dd`, `vi"<leader>p`)
+# Precice: yi"  |  <leader>dd  |  vi"<leader>p
+# ZADATAK:
+#   1. Kopiraj `"512Mi"` iz `requests.memory` sa `yi"`.
+#   2. Obrisi liniju `ephemeral-storage: "OBRISI_ME"` u void registar (`<leader>dd`).
+#   3. Zameni `"FIXME"` u `limits.memory` sa `vi"<leader>p`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: worker-07
+spec:
+  containers:
+    - name: worker
+      resources:
+        requests:
+          memory: "512Mi"
+        ephemeral-storage: "OBRISI_ME"
+        limits:
+          memory: "FIXME"
+# OCEKIVANI REZULTAT:
+#   ephemeral-storage je obrisana, limits.memory je "512Mi".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 08 / 20 — K8s YAML Indent Popravka (`V` + `>` / `<`)
+# Precice: V (selektuj linije)  |  > (uvuci za 2 razmaka)  |  < (izvuci)
+# ZADATAK: Linije `requests:` i `cpu: "250m"` imaju pogresan indent.
+#   1. Uvuci `requests:` na tacno 4 razmaka (ispod `resources:`).
+#   2. Uvuci `cpu: "250m"` i `memory: "256Mi"` na tacno 6 razmaka (ispod `requests:`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: indent-fix
+spec:
+  resources:
+requests:
+  cpu: "250m"
+  memory: "256Mi"
+# OCEKIVANI REZULTAT:
+#   resources:
+#     requests:
+#       cpu: "250m"
+#       memory: "256Mi"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 09 / 20 — K8s SecurityContext Hardening (`ciw`, `gcc`)
+# Precice: ciw  |  gcc
+# ZADATAK:
+#   1. Promeni `runAsNonRoot: false` u `true`.
+#   2. Promeni `readOnlyRootFilesystem: false` u `true`.
+#   3. Promeni `allowPrivilegeEscalation: true` u `false`.
+#   4. Zakomentarisi `privileged: true` pomocu `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-pod
+spec:
+  securityContext:
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: true
+    privileged: true
+# OCEKIVANI REZULTAT:
+#     runAsNonRoot: true
+#     readOnlyRootFilesystem: true
+#     allowPrivilegeEscalation: false
+#     # privileged: true
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 10 / 20 — K8s Ingress & HPA Combo (`cs'"`, `ci"`, `<C-a>`, `gcc`)
+# Precice: cs'"  |  ci"  |  <C-a>  |  gcc
+# ZADATAK:
+#   1. Promeni `host: 'old.example.com'` u `"api.prod.internal"`.
+#   2. Povecaj `minReplicas: 1` u `2` i `maxReplicas: 3` u `10`.
+#   3. Zakomentarisi `beta_debug: "true"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+  annotations:
+    host: 'old.example.com'
+    beta_debug: "true"
+spec:
+  minReplicas: 1
+  maxReplicas: 3
+# OCEKIVANI REZULTAT:
+#     host: "api.prod.internal"
+#     # beta_debug: "true"
+#   minReplicas: 2
+#   maxReplicas: 10
+
+---
+# ============================================================================
+#  TIER 3: ANSIBLE OSNOVE — Playbooks, FQCN, Tasks, Jinja2 & Handlers (11-15)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 11 / 20 — Ansible Playbook Header (`ciw`, `<leader>dd`)
+# Precice: ciw  |  <leader>dd
+# ZADATAK:
+#   1. Promeni `hosts: dev_servers` u `prod_web`.
+#   2. Promeni `become: false` u `true`.
+#   3. Promeni `remote_user: ops` u `ansible`.
+#   4. Obrisi liniju `junk_option: remove_me` sa `<leader>dd`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Configure RHEL 9 web tier
+  hosts: dev_servers
+  become: false
+  remote_user: ops
+  junk_option: remove_me
+  gather_facts: true
+# OCEKIVANI REZULTAT:
+#   hosts: prod_web
+#   become: true
+#   remote_user: ansible
+#   (junk_option obrisana)
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 12 / 20 — Ansible FQCN Migracija za RHEL 9 (`ciw` / `ct:`)
+# Precice: ct: (promeni do dvotacke!)
+# ZADATAK: Pretvori stare kratke module u moderne FQCN module sa `ct:`:
+#   1. `yum:` -> `ansible.builtin.dnf:`
+#   2. `service:` -> `ansible.builtin.systemd:`
+#   3. `copy:` -> `ansible.builtin.template:`
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 FQCN migration
+  hosts: prod_web
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+    - name: Render nginx config
+      copy:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+    - name: Ensure nginx is running
+      service:
+        name: nginx
+        state: started
+# OCEKIVANI REZULTAT:
+#   ansible.builtin.dnf:, ansible.builtin.template:, ansible.builtin.systemd:
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 13 / 20 — Ansible Task Reordering (`V` + `J` / `K`)
+# Precice: V2j (selektuj ceo task)  |  J / K (pomeri gore/dole)
+# ZADATAK: Poredjaj 3 taska u ispravan redosled izvrsavanja:
+#   1. `Install nginx package`
+#   2. `Deploy nginx config`
+#   3. `Start and enable nginx`
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Ordered deploy
+  hosts: prod_web
+  tasks:
+    - name: Start and enable nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+    - name: Install nginx package
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+    - name: Deploy nginx config
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+# OCEKIVANI REZULTAT: Install -> Deploy -> Start.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 14 / 20 — Ansible Jinja2 & Mode Surround (`ys`, `cs`, `ds`)
+# Precice: cs'"  |  ds)  |  ci"
+# ZADATAK:
+#   1. Obavij `app_src` u Jinja2 string `"{{ app_src }}"`.
+#   2. Promeni `'/etc/nginx/conf.d/app.conf'` u `"/etc/nginx/conf.d/app.conf"` (`cs'"`).
+#   3. Skini zagrade oko `("0644")` sa `ds)` -> `"0644"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Deploy app vhost
+  ansible.builtin.template:
+    src: app_src
+    dest: '/etc/nginx/conf.d/app.conf'
+    mode: ("0644")
+# OCEKIVANI REZULTAT:
+#     src: "{{ app_src }}"
+#     dest: "/etc/nginx/conf.d/app.conf"
+#     mode: "0644"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 15 / 20 — Ansible Handlers & Notify (`yi"`, `vi"<leader>p`, `ciw`)
+# Precice: yi"  |  vi"<leader>p  |  ciw
+# ZADATAK:
+#   1. Kopiraj `"Restart nginx"` iz handlera sa `yi"`.
+#   2. Pregazi oba `notify: "TODO"` sa `vi"<leader>p`.
+#   3. U handleru promeni `state: reloaded` u `state: restarted`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Nginx with handlers
+  hosts: prod_web
+  tasks:
+    - name: Update main config
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: "TODO"
+    - name: Update TLS config
+      ansible.builtin.template:
+        src: tls.conf.j2
+        dest: /etc/nginx/conf.d/tls.conf
+      notify: "TODO"
+  handlers:
+    - name: "Restart nginx"
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+# OCEKIVANI REZULTAT:
+#   Oba notify su "Restart nginx", handler ima state: restarted.
+
+---
+# ============================================================================
+#  TIER 4: SRE BOSS NIVOI — RHEL 9 Hardening, NetworkPolicy & Gauntlet (16-20)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 16 / 20 — Ansible RHEL 9 Packages & Repo (`gcc`, `ciw`, `<leader>s`)
+# Precice: gcc  |  ciw  |  <leader>s
+# ZADATAK:
+#   1. Zakomentarisi nesigurni paket `- telnet` sa `gcc`.
+#   2. Promeni `state: absent` u `state: present`.
+#   3. Zameni sve pojave `old_repo_16` u `rhel9_baseos` pomocu `<leader>s`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 base packages
+  hosts: prod_web
+  vars:
+    primary_repo: old_repo_16
+    fallback_repo: old_repo_16
+  tasks:
+    - name: Install core tools
+      ansible.builtin.dnf:
+        enablerepo: old_repo_16
+        name:
+          - firewalld
+          - chrony
+          - telnet
+        state: absent
+# OCEKIVANI REZULTAT:
+#   # - telnet, state: present, sve 3 pojave su rhel9_baseos.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 17 / 20 — K8s NetworkPolicy Lockdown (`gcc`, `ds)`, `cs'"`)
+# Precice: gcc  |  ds)  |  cs'"
+# ZADATAK:
+#   1. Otkomentarisi `- Egress` pomocu `gcc`.
+#   2. Skini zagrade oko `(5432)` pomocu `ds)` -> `5432`.
+#   3. Promeni `protocol: 'TCP'` u `"TCP"` sa `cs'"`.
+#   4. Promeni `role: 'frontend'` u `"backend"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-allow-backend
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+    # - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: 'frontend'
+      ports:
+        - protocol: 'TCP'
+          port: (5432)
+# OCEKIVANI REZULTAT:
+#   - Egress otkomentarisan, role: "backend", protocol: "TCP", port: 5432.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 18 / 20 — BOSS 1: K8s Production Deployment Surgery
+# Kombinuj: <C-a>, ci", ciw, gcc, <leader>s, ds)
+# ZADATAK:
+#   1. Zameni sve pojave `staging_pay_18` u `prod_pay` pomocu `<leader>s`.
+#   2. Povecaj `replicas: 1` u `3` (`2<C-a>`).
+#   3. Promeni image u `"registry.internal/payments:v2.4.0"`.
+#   4. Promeni `runAsNonRoot: false` u `true` i skini zagrade oko `(8443)`.
+#   5. Zakomentarisi `DEBUG_MODE: "true"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staging_pay_18
+  namespace: staging_pay_18
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: staging_pay_18
+    spec:
+      securityContext:
+        runAsNonRoot: false
+      containers:
+        - name: payments
+          image: "registry.internal/payments:v1.0.0"
+          ports:
+            - containerPort: (8443)
+          env:
+            - name: DEBUG_MODE
+              DEBUG_MODE: "true"
+# OCEKIVANI REZULTAT:
+#   prod_pay svuda, replicas: 3, image v2.4.0, runAsNonRoot: true,
+#   containerPort: 8443, # DEBUG_MODE: "true".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 19 / 20 — BOSS 2: Ansible Zero-Downtime Rolling Deploy
+# Kombinuj: ciw, V+J/K, yi"+vi"<leader>p, gcc
+# ZADATAK:
+#   1. Promeni `serial: 10` u `serial: 1` i `become: false` u `become: true`.
+#   2. Zakomentarisi `ignore_errors: true` sa `gcc`.
+#   3. Poredjaj 3 taska u redosled: `Drain node` -> `Upgrade app` -> `Enable node`.
+#   4. Kopiraj `"Reload haproxy"` iz handlera i ubaci u `notify: "FIXME"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Rolling deploy
+  hosts: prod_web
+  serial: 10
+  become: false
+  ignore_errors: true
+  tasks:
+    - name: Enable node
+      ansible.builtin.command: /usr/local/bin/node-enable
+    - name: Drain node
+      ansible.builtin.command: /usr/local/bin/node-drain
+    - name: Upgrade app
+      ansible.builtin.dnf:
+        name: payments-api
+        state: latest
+      notify: "FIXME"
+  handlers:
+    - name: "Reload haproxy"
+      ansible.builtin.systemd:
+        name: haproxy
+        state: reloaded
+# OCEKIVANI REZULTAT:
+#   serial: 1, become: true, # ignore_errors: true,
+#   Drain -> Upgrade -> Enable, notify: "Reload haproxy".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 20 / 20 — FINAL DEVOPS BOSS: Ansible + K8s GitOps Release Gauntlet
+# Kombinuj SVE: <leader>dd, <leader>s, <C-a>, cs'", ds), gcc, V+J/K!
+# ZADATAK:
+#   1. Obrisi liniju `trash_flag_20: "DELETE_ME"` u void registar (`<leader>dd`).
+#   2. Zameni sve pojave `canary_v1` u `stable_v2` pomocu `<leader>s`.
+#   3. Povecaj `replicas: 1` na `5` (`4<C-a>`).
+#   4. Promeni `env: 'staging'` u `"production"` i skini zagrade sa `(443)`.
+#   5. Zakomentarisi `dry_run: true` (`gcc`) i pomeri `tier: "critical"` na vrh `labels:`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitops-release-canary_v1
+  labels:
+    release: canary_v1
+    tier: "critical"
+spec:
+  replicas: 1
+  trash_flag_20: "DELETE_ME"
+  dry_run: true
+  template:
+    spec:
+      containers:
+        - name: release-controller
+          image: "ghcr.io/org/app:canary_v1"
+          env: 'staging'
+          port: (443)
+# OCEKIVANI REZULTAT:
+#   trash_flag_20 obrisana, stable_v2 svuda, replicas: 5,
+#   tier: "critical" iznad release: stable_v2, # dry_run: true,
+#   env: "production", port: 443.

@@ -2,11 +2,12 @@
 --  NEOVIM DOJO — 33 NIVOA (MODIFIKOVANI VIM GOLF ZA TVOJ CONFIG)
 -- ============================================================================
 --  Kako se igra:
---    1. Otvori ovaj fajl: `nvim learn_nvim.lua`
+--    1. Otvori ovaj fajl: `nvim learning/learn_nvim.lua`
 --    2. Radi nivoe redom (ili skoci: `/NIVO 15`, ili `:DojoNext`).
 --    3. Provera je automatska. Kad nivo prodje, pored naslova stane ✓.
 --       Delimican napredak je • i n/m. Winbar pokazuje skor i sta fali.
 --    4. `:Dojo` lista sve nivoe. `:DojoNext` skace na prvi nedovrsen.
+--       `:DojoGames` bira igru (Lua Core 33 nivoa <-> DevOps YAML 20 nivoa).
 --    5. Vise igraca (Save / New / Load Game):
 --         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/33)
 --         - `:DojoSave [ime]` (ili `:w`) = Save Game (cuva napredak + kod, fajl na disku ostaje cist!)
@@ -446,7 +447,7 @@ local nivo_21_demo = {
 -- NIVO 22 / 33 — Oil fajl menadzer (editovanje foldera kao bafera)
 -- Precice: - (otvori Oil u trenutnom folderu)  |  <leader>pv (netrw)
 -- ZADATAK:
---   1. Pritisni `-` da otvoris `~/.config/nvim/` u Oil-u.
+--   1. Pritisni `-` da otvoris `learning/` u Oil-u, pa jos jednom `-` za `~/.config/nvim/`.
 --   2. Kreci se `j`/`k`, udji u `lua/fikolis/lazy/` sa `<Enter>`, vrati se
 --      nivo gore sa `-`.
 --   3. Vrati se nazad na `learn_nvim.lua` (`<Enter>` na fajlu ili `<C-o>`).
