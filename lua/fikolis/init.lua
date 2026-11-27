@@ -95,4 +95,3 @@ vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
 
 require("fikolis.learn_dojo").setup()
-require("fikolis.learn_grok").setup()
