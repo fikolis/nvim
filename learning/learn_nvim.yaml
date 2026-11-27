@@ -1,14 +1,14 @@
 # ============================================================================
-#  NEOVIM DEVOPS DOJO — 20 NIVOA (KUBERNETES & ANSIBLE ZA TVOJ CONFIG)
+#  NEOVIM DEVOPS DOJO — 50 NIVOA (KUBERNETES & ANSIBLE ZA TVOJ CONFIG)
 # ============================================================================
 #  Kako se igra:
 #    1. Otvori ovaj fajl: `nvim learning/learn_nvim.yaml`
 #    2. Radi nivoe redom (ili skoci: `/NIVO 11`, ili `:DojoNext`).
 #    3. Provera je automatska. Svaki red i korak dobija `[ ]` -> `✓`.
 #       Winbar na vrhu pokazuje igraca, skor i sta jos fali.
-#    4. `:DojoGames` menja igru (Lua Core 33 nivoa <-> DevOps YAML 20 nivoa).
+#    4. `:DojoGames` menja igru (Lua Core 33 nivoa <-> DevOps YAML 50 nivoa).
 #    5. Vise igraca (Save / New / Load Game):
-#         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/20)
+#         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/50)
 #         - `:DojoSave [ime]` (ili `:w`) = Save Game (cuva napredak + YAML)
 #         - `:DojoLoad [ime]` (ili `:DojoContinue`) = izaberi igraca i nastavi
 #         - `:DojoDelete [ime]` = obrisi sacuvanog igraca
@@ -23,7 +23,7 @@
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# NIVO 01 / 20 — K8s Deployment Scale & Image Bump
+# NIVO 01 / 50 — K8s Deployment Scale & Image Bump
 # Precice: 2<C-a> (povecaj broj)  |  ci" / f:  |  ciw
 # ZADATAK:
 #   1. Stani na `1` u `replicas: 1` i povecaj na `3` pomocu `2<C-a>`.
@@ -50,7 +50,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 02 / 20 — K8s Env Vars: Paste bez gubitka yanka
+# NIVO 02 / 50 — K8s Env Vars: Paste bez gubitka yanka
 # Precice: yi"  |  vi"<leader>p  (`"_dP` u Visual modu)
 # ZADATAK:
 #   1. Kopiraj `"production"` iz `CLUSTER_ENV` pomocu `yi"`.
@@ -74,7 +74,7 @@ data:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 03 / 20 — K8s Probes & Komentari (`gcc` / `gc`)
+# NIVO 03 / 50 — K8s Probes & Komentari (`gcc` / `gc`)
 # Precice: gcc (jedna linija)  |  V2jgc (blok od 3 linije)
 # ZADATAK:
 #   1. Zakomentarisi debug port `containerPort: 9999` pomocu `gcc`.
@@ -104,7 +104,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 04 / 20 — K8s InitContainers Redosled (`V` + `J` / `K`)
+# NIVO 04 / 50 — K8s InitContainers Redosled (`V` + `J` / `K`)
 # Precice: V (Visual Line)  |  J (dole)  |  K (gore)
 # ZADATAK: Poredjaj korake startovanja u `args:` od 1 do 4 pomocu `V` i `J`/`K`!
 # ----------------------------------------------------------------------------
@@ -129,7 +129,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 05 / 20 — K8s Namespace Zamena svuda (`<leader>s`)
+# NIVO 05 / 50 — K8s Namespace Zamena svuda (`<leader>s`)
 # Precice: <leader>s  (`:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI`)
 # ZADATAK: Stani na `legacy_ns_05`, pritisni `<leader>s`, ukucaj `prod_payments`
 #          i pritisni `<Enter>` da promenis sve 4 pojave odjednom!
@@ -154,7 +154,7 @@ spec:
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# NIVO 06 / 20 — K8s ConfigMap Surround (`ys`, `cs`, `ds`)
+# NIVO 06 / 50 — K8s ConfigMap Surround (`ys`, `cs`, `ds`)
 # Precice: ysiw"  |  cs'"  |  ds)
 # ZADATAK:
 #   1. Stavi `eu_central` u duple navodnike (`ysiw"`) -> `"eu_central"`.
@@ -177,7 +177,7 @@ data:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 07 / 20 — K8s Resources Void Delete (`yi"`, `<leader>dd`, `vi"<leader>p`)
+# NIVO 07 / 50 — K8s Resources Void Delete (`yi"`, `<leader>dd`, `vi"<leader>p`)
 # Precice: yi"  |  <leader>dd  |  vi"<leader>p
 # ZADATAK:
 #   1. Kopiraj `"512Mi"` iz `requests.memory` sa `yi"`.
@@ -203,7 +203,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 08 / 20 — K8s YAML Indent Popravka (`V` + `>` / `<`)
+# NIVO 08 / 50 — K8s YAML Indent Popravka (`V` + `>` / `<`)
 # Precice: V (selektuj linije)  |  > (uvuci za 2 razmaka)  |  < (izvuci)
 # ZADATAK: Linije `requests:` i `cpu: "250m"` imaju pogresan indent.
 #   1. Uvuci `requests:` na tacno 4 razmaka (ispod `resources:`).
@@ -227,7 +227,7 @@ requests:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 09 / 20 — K8s SecurityContext Hardening (`ciw`, `gcc`)
+# NIVO 09 / 50 — K8s SecurityContext Hardening (`ciw`, `gcc`)
 # Precice: ciw  |  gcc
 # ZADATAK:
 #   1. Promeni `runAsNonRoot: false` u `true`.
@@ -254,7 +254,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 10 / 20 — K8s Ingress & HPA Combo (`cs'"`, `ci"`, `<C-a>`, `gcc`)
+# NIVO 10 / 50 — K8s Ingress & HPA Combo (`cs'"`, `ci"`, `<C-a>`, `gcc`)
 # Precice: cs'"  |  ci"  |  <C-a>  |  gcc
 # ZADATAK:
 #   1. Promeni `host: 'old.example.com'` u `"api.prod.internal"`.
@@ -284,7 +284,7 @@ spec:
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# NIVO 11 / 20 — Ansible Playbook Header (`ciw`, `<leader>dd`)
+# NIVO 11 / 50 — Ansible Playbook Header (`ciw`, `<leader>dd`)
 # Precice: ciw  |  <leader>dd
 # ZADATAK:
 #   1. Promeni `hosts: dev_servers` u `prod_web`.
@@ -307,7 +307,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 12 / 20 — Ansible FQCN Migracija za RHEL 9 (`ciw` / `ct:`)
+# NIVO 12 / 50 — Ansible FQCN Migracija za RHEL 9 (`ciw` / `ct:`)
 # Precice: ct: (promeni do dvotacke!)
 # ZADATAK: Pretvori stare kratke module u moderne FQCN module sa `ct:`:
 #   1. `yum:` -> `ansible.builtin.dnf:`
@@ -335,7 +335,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 13 / 20 — Ansible Task Reordering (`V` + `J` / `K`)
+# NIVO 13 / 50 — Ansible Task Reordering (`V` + `J` / `K`)
 # Precice: V2j (selektuj ceo task)  |  J / K (pomeri gore/dole)
 # ZADATAK: Poredjaj 3 taska u ispravan redosled izvrsavanja:
 #   1. `Install nginx package`
@@ -362,7 +362,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 14 / 20 — Ansible Jinja2 & Mode Surround (`ys`, `cs`, `ds`)
+# NIVO 14 / 50 — Ansible Jinja2 & Mode Surround (`ys`, `cs`, `ds`)
 # Precice: cs'"  |  ds)  |  ci"
 # ZADATAK:
 #   1. Obavij `app_src` u Jinja2 string `"{{ app_src }}"`.
@@ -382,7 +382,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 15 / 20 — Ansible Handlers & Notify (`yi"`, `vi"<leader>p`, `ciw`)
+# NIVO 15 / 50 — Ansible Handlers & Notify (`yi"`, `vi"<leader>p`, `ciw`)
 # Precice: yi"  |  vi"<leader>p  |  ciw
 # ZADATAK:
 #   1. Kopiraj `"Restart nginx"` iz handlera sa `yi"`.
@@ -417,7 +417,7 @@ spec:
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# NIVO 16 / 20 — Ansible RHEL 9 Packages & Repo (`gcc`, `ciw`, `<leader>s`)
+# NIVO 16 / 50 — Ansible RHEL 9 Packages & Repo (`gcc`, `ciw`, `<leader>s`)
 # Precice: gcc  |  ciw  |  <leader>s
 # ZADATAK:
 #   1. Zakomentarisi nesigurni paket `- telnet` sa `gcc`.
@@ -444,7 +444,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 17 / 20 — K8s NetworkPolicy Lockdown (`gcc`, `ds)`, `cs'"`)
+# NIVO 17 / 50 — K8s NetworkPolicy Lockdown (`gcc`, `ds)`, `cs'"`)
 # Precice: gcc  |  ds)  |  cs'"
 # ZADATAK:
 #   1. Otkomentarisi `- Egress` pomocu `gcc`.
@@ -477,7 +477,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 18 / 20 — BOSS 1: K8s Production Deployment Surgery
+# NIVO 18 / 50 — BOSS 1: K8s Production Deployment Surgery
 # Kombinuj: <C-a>, ci", ciw, gcc, <leader>s, ds)
 # ZADATAK:
 #   1. Zameni sve pojave `staging_pay_18` u `prod_pay` pomocu `<leader>s`.
@@ -515,7 +515,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 19 / 20 — BOSS 2: Ansible Zero-Downtime Rolling Deploy
+# NIVO 19 / 50 — BOSS 2: Ansible Zero-Downtime Rolling Deploy
 # Kombinuj: ciw, V+J/K, yi"+vi"<leader>p, gcc
 # ZADATAK:
 #   1. Promeni `serial: 10` u `serial: 1` i `become: false` u `become: true`.
@@ -550,7 +550,7 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 20 / 20 — FINAL DEVOPS BOSS: Ansible + K8s GitOps Release Gauntlet
+# NIVO 20 / 50 — FINAL DEVOPS BOSS: Ansible + K8s GitOps Release Gauntlet
 # Kombinuj SVE: <leader>dd, <leader>s, <C-a>, cs'", ds), gcc, V+J/K!
 # ZADATAK:
 #   1. Obrisi liniju `trash_flag_20: "DELETE_ME"` u void registar (`<leader>dd`).
@@ -582,3 +582,993 @@ spec:
 #   trash_flag_20 obrisana, stable_v2 svuda, replicas: 5,
 #   tier: "critical" iznad release: stable_v2, # dry_run: true,
 #   env: "production", port: 443.
+
+---
+# ============================================================================
+#  TIER 5: K8S & OPENSHIFT PRODUKCIJA — StatefulSet, CronJob, PDB, RBAC (21-25)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 21 / 50 — K8s StatefulSet: Postgres HA Klaster
+# Precice: 2<C-a>  |  ci"  |  ds)  |  gcc
+# ZADATAK:
+#   1. Povecaj `replicas: 1` u `3` (`2<C-a>`) i `serviceName: "pg-dev"` u `"postgres-headless"`.
+#   2. Promeni image u `"postgres:16.4-alpine"`.
+#   3. Skini zagrade oko `("50Gi")` (`ds)`) i promeni `storageClassName: "hdd"` u `"fast-ssd"`.
+#   4. Zakomentarisi `PG_DEBUG_SQL: "true"` pomocu `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-ha
+spec:
+  serviceName: "pg-dev"
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: postgres
+          image: "postgres:14.0"
+          env:
+            - name: PG_DEBUG_SQL
+              PG_DEBUG_SQL: "true"
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        storageClassName: "hdd"
+        resources:
+          requests:
+            storage: ("50Gi")
+# OCEKIVANI REZULTAT:
+#   replicas: 3, serviceName: "postgres-headless", image: "postgres:16.4-alpine",
+#   storageClassName: "fast-ssd", storage: "50Gi", # PG_DEBUG_SQL: "true".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 22 / 50 — K8s CronJob: Nightly Backup Incident (Pali klaster svakog minuta!)
+# Precice: ci"  |  ciw  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Hitno promeni `schedule: "* * * * *"` u `"0 2 * * *"` (2 ujutru!).
+#   2. Promeni `concurrencyPolicy: Allow` u `Forbid` i `successfulJobsHistoryLimit: 100` u `3`.
+#   3. Promeni `restartPolicy: Always` u `OnFailure`.
+#   4. Obrisi `debug_sleep_22: "9999"` (`<leader>dd`) i zakomentarisi `- "--dry-run"` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-pg-backup
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Allow
+  successfulJobsHistoryLimit: 100
+  debug_sleep_22: "9999"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Always
+          containers:
+            - name: pg-dump
+              args:
+                - "--format=custom"
+                - "--dry-run"
+# OCEKIVANI REZULTAT:
+#   schedule: "0 2 * * *", concurrencyPolicy: Forbid, successfulJobsHistoryLimit: 3,
+#   restartPolicy: OnFailure, debug_sleep_22 obrisana, # - "--dry-run".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 23 / 50 — K8s PodDisruptionBudget & TopologySpread
+# Precice: <C-a>  |  cs'"  |  ciw  |  V + K
+# ZADATAK:
+#   1. Povecaj `minAvailable: 0` u `2` (`2<C-a>`) i `maxSkew: 5` u `1`.
+#   2. Promeni `topologyKey: 'kubernetes.io/hostname'` u `"topology.kubernetes.io/zone"`.
+#   3. Promeni `whenUnsatisfiable: ScheduleAnyway` u `DoNotSchedule`.
+#   4. Pomeri `app: checkout` na PRVO mesto ispod `matchLabels:` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: checkout-pdb
+spec:
+  minAvailable: 0
+  maxSkew: 5
+  topologyKey: 'kubernetes.io/hostname'
+  whenUnsatisfiable: ScheduleAnyway
+  selector:
+    matchLabels:
+      tier: frontend
+      app: checkout
+# OCEKIVANI REZULTAT:
+#   minAvailable: 2, maxSkew: 1, topologyKey: "topology.kubernetes.io/zone",
+#   whenUnsatisfiable: DoNotSchedule, app: checkout iznad tier: frontend.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 24 / 50 — K8s RBAC Least-Privilege Audit
+# Precice: gcc  |  <leader>dd  |  cs'"  |  ciw
+# ZADATAK:
+#   1. Zakomentarisi opasni resurs `- "secrets"` i opasnu akciju `- "delete"` (`gcc`).
+#   2. Obrisi liniju `wildcard_hack_24: "*"` u void registar (`<leader>dd`).
+#   3. Promeni `'pods'` -> `"pods"` i `'configmaps'` -> `"configmaps"` (`cs'"`).
+#   4. Promeni `roleRef` `name: cluster-admin` u `readonly-ops`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ops-viewer
+rules:
+  - apiGroups: [""]
+    wildcard_hack_24: "*"
+    resources:
+      - 'pods'
+      - 'configmaps'
+      - "secrets"
+    verbs:
+      - "get"
+      - "list"
+      - "delete"
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+# OCEKIVANI REZULTAT:
+#   # - "secrets", # - "delete", wildcard_hack_24 obrisana,
+#   "pods", "configmaps", name: readonly-ops.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 25 / 50 — OpenShift Route & TLS Edge Termination
+# Precice: ci"  |  ciw  |  ds)  |  <C-a>  |  gcc
+# ZADATAK:
+#   1. Promeni `host: "portal.apps.dev.local"` u `"portal.apps.ocp-prod.internal"`.
+#   2. Promeni `termination: passthrough` u `edge` i `insecureEdgeTerminationPolicy: Allow` u `Redirect`.
+#   3. Skini zagrade oko `targetPort: (8443)` (`ds)`) i stavi `weight: 100`.
+#   4. Zakomentarisi `haproxy_debug: "on"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: customer-portal
+  annotations:
+    haproxy_debug: "on"
+spec:
+  host: "portal.apps.dev.local"
+  to:
+    kind: Service
+    name: portal-svc
+    weight: 50
+  port:
+    targetPort: (8443)
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Allow
+# OCEKIVANI REZULTAT:
+#   host: "portal.apps.ocp-prod.internal", weight: 100, targetPort: 8443,
+#   termination: edge, insecureEdgeTerminationPolicy: Redirect, # haproxy_debug: "on".
+
+---
+# ============================================================================
+#  TIER 6: GITOPS, HELM, SECRETS, ALERTS & DAEMONSET (26-30)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 26 / 50 — ArgoCD Application: Auto-Sync & Self-Heal
+# Precice: <leader>s  |  ci"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Zameni sve pojave `dev_cluster_26` u `ocp_prod` pomocu `<leader>s`.
+#   2. Promeni `targetRevision: "HEAD"` u `"v3.2.0"`.
+#   3. Upali `prune: true` i `selfHeal: true`.
+#   4. Otkomentarisi `- CreateNamespace=true` i zakomentarisi `skipDryRun: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: billing-dev_cluster_26
+spec:
+  project: dev_cluster_26
+  source:
+    repoURL: "https://git.internal/gitops/dev_cluster_26.git"
+    targetRevision: "HEAD"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    skipDryRun: true
+    syncOptions:
+      # - CreateNamespace=true
+# OCEKIVANI REZULTAT:
+#   ocp_prod svuda, targetRevision: "v3.2.0", prune: true, selfHeal: true,
+#   - CreateNamespace=true otkomentarisan, # skipDryRun: true.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 27 / 50 — Helm `values.yaml` Production Override
+# Precice: <C-a>  |  yi" + vi"<leader>p  |  ciw  |  V + >
+# ZADATAK:
+#   1. Povecaj `replicaCount: 1` u `4` (`3<C-a>`).
+#   2. Kopiraj `"v4.1.0"` iz `releaseVersion` (`yi"`) i pregazi `tag` i `appVersion` (`vi"<leader>p`).
+#   3. Promeni `pullPolicy: Always` u `IfNotPresent` i `ingress.enabled: false` u `true`.
+#   4. Uvuci `tls:` blok ispod `ingress:` (`tls:` na 2 razmaka, `secretName:` na 4 razmaka) sa `V` + `>`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+releaseVersion: "v4.1.0"
+replicaCount: 1
+image:
+  repository: "quay.io/sre/gateway"
+  tag: "latest"
+  appVersion: "dev"
+  pullPolicy: Always
+ingress:
+  enabled: false
+tls:
+  secretName: "gateway-tls"
+# OCEKIVANI REZULTAT:
+#   replicaCount: 4, tag: "v4.1.0", appVersion: "v4.1.0", pullPolicy: IfNotPresent,
+#   enabled: true, tls: (2 sp), secretName: (4 sp).
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 28 / 50 — ExternalSecrets & Vault Integracija
+# Precice: <leader>s  |  ds)  |  ciw  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Zameni sve pojave `vault_staging_28` u `vault_prod` pomocu `<leader>s`.
+#   2. Skini zagrade oko `refreshInterval: ("15m")` (`ds)`) -> `"15m"`.
+#   3. Promeni `creationPolicy: Orphan` u `Owner`.
+#   4. Obrisi `plaintext_leak_28: "hunter2"` (`<leader>dd`) i zakomentarisi `allowInsecureTLS: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: db-creds-vault_staging_28
+spec:
+  refreshInterval: ("15m")
+  secretStoreRef:
+    name: vault_staging_28
+    kind: ClusterSecretStore
+  allowInsecureTLS: true
+  plaintext_leak_28: "hunter2"
+  target:
+    name: db-credentials
+    creationPolicy: Orphan
+  dataFrom:
+    - extract:
+        key: "secret/data/vault_staging_28/db"
+# OCEKIVANI REZULTAT:
+#   vault_prod svuda, refreshInterval: "15m", creationPolicy: Owner,
+#   plaintext_leak_28 obrisana, # allowInsecureTLS: true.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 29 / 50 — Prometheus AlertRule: 3 AM PagerDuty Spas
+# Precice: ci"  |  gcc  |  V + K
+# ZADATAK:
+#   1. Pomeri `alert: HighPodRestarts` na PRVO mesto ispod `rules:` (`V` + `K`).
+#   2. Promeni `for: "1s"` u `"5m"` (da ne zvoni PagerDuty za svaki glitch!).
+#   3. Promeni `severity: "info"` u `"critical"` i `team: "unknown"` u `"sre-platform"`.
+#   4. Promeni `runbook: "TODO"` u `"https://wiki.internal/oom"` i zakomentarisi `mute_all_alerts: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-alerts
+spec:
+  rules:
+    for: "1s"
+    alert: HighPodRestarts
+    mute_all_alerts: true
+    labels:
+      severity: "info"
+      team: "unknown"
+    annotations:
+      runbook: "TODO"
+# OCEKIVANI REZULTAT:
+#   alert: HighPodRestarts prvi, for: "5m", # mute_all_alerts: true,
+#   severity: "critical", team: "sre-platform", runbook: "https://wiki.internal/oom".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 30 / 50 — K8s DaemonSet: Node Log Collector
+# Precice: ci"  |  cs'"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Promeni image u `"fluent/fluent-bit:3.1"`.
+#   2. Promeni `path: '/tmp/logs'` u `"/var/log/containers"` i `readOnly: false` u `true`.
+#   3. Promeni `operator: 'Equal'` u `"Exists"` i `effect: 'PreferNoSchedule'` u `"NoSchedule"`.
+#   4. Zakomentarisi `drop_all_logs: true` pomocu `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit
+spec:
+  template:
+    spec:
+      tolerations:
+        - operator: 'Equal'
+          effect: 'PreferNoSchedule'
+      containers:
+        - name: fluent-bit
+          image: "fluent/fluent-bit:1.9"
+          drop_all_logs: true
+          volumeMounts:
+            - name: varlog
+              readOnly: false
+      volumes:
+        - name: varlog
+          hostPath:
+            path: '/tmp/logs'
+# OCEKIVANI REZULTAT:
+#   image: "fluent/fluent-bit:3.1", path: "/var/log/containers", readOnly: true,
+#   operator: "Exists", effect: "NoSchedule", # drop_all_logs: true.
+
+---
+# ============================================================================
+#  TIER 7: ANSIBLE RHEL 9 SISTEMSKA ADMINISTRACIJA (31-35)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 31 / 50 — Ansible RHEL 9 `firewalld` & Portovi
+# Precice: ct:  |  ds)  |  ciw  |  gcc
+# ZADATAK:
+#   1. Prebaci `firewalld:` u FQCN `ansible.posix.firewalld:` (`ct:`).
+#   2. Skini zagrade oko `port: ("443/tcp")` (`ds)`) -> `"443/tcp"`.
+#   3. Postavi `permanent: true`, `immediate: true` i `state: enabled`.
+#   4. Zakomentarisi opasnu liniju `- "23/tcp"` (telnet!) pomocu `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 firewall hardening
+  hosts: prod_web
+  become: true
+  tasks:
+    - name: Allow HTTPS traffic
+      firewalld:
+        port: ("443/tcp")
+        permanent: false
+        immediate: false
+        state: disabled
+    - name: Extra ports
+      vars:
+        ports:
+          - "443/tcp"
+          - "23/tcp"
+# OCEKIVANI REZULTAT:
+#   ansible.posix.firewalld:, port: "443/tcp", permanent: true,
+#   immediate: true, state: enabled, # - "23/tcp".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 32 / 50 — Ansible RHEL 9 SELinux & Sysctl Tuning
+# Precice: ciw  |  cs'"  |  ci"  |  <leader>dd
+# ZADATAK:
+#   1. Prebaci SELinux iz `state: disabled` u `state: enforcing` i `policy: minimum` u `targeted`.
+#   2. Promeni `name: 'net.ipv4.ip_forward'` u `"net.ipv4.ip_forward"` (`cs'"`).
+#   3. Promeni `value: "0"` u `"1"` i `reload: false` u `true`.
+#   4. Obrisi `selinux_bypass_32: true` u void registar (`<leader>dd`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 SELinux and kernel tuning
+  hosts: k8s_nodes
+  become: true
+  tasks:
+    - name: Enforce SELinux
+      ansible.posix.selinux:
+        policy: minimum
+        state: disabled
+        selinux_bypass_32: true
+    - name: Enable IP forwarding
+      ansible.posix.sysctl:
+        name: 'net.ipv4.ip_forward'
+        value: "0"
+        reload: false
+# OCEKIVANI REZULTAT:
+#   policy: targeted, state: enforcing, selinux_bypass_32 obrisana,
+#   name: "net.ipv4.ip_forward", value: "1", reload: true.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 33 / 50 — Ansible `block / rescue / always` Error Recovery
+# Precice: V + J/K  |  ci"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Postavi `become: true` u headeru playbooka.
+#   2. Poredjaj sekcije ispravnim redom: `block:` -> `rescue:` -> `always:` (`V` + `J`/`K`).
+#   3. Zakomentarisi `failed_when: false` (`gcc`).
+#   4. U `rescue:` promeni `msg: "TODO"` u `"Rollback triggered"`, a u `always:` stavi `state: absent`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Safe DB migration with rescue
+  hosts: db_primary
+  become: false
+  tasks:
+    - always:
+        - name: Cleanup lock file
+          ansible.builtin.file:
+            path: /var/run/migrate.lock
+            state: touch
+      rescue:
+        - name: Notify rollback
+          ansible.builtin.debug:
+            msg: "TODO"
+      block:
+        - name: Run schema migration
+          ansible.builtin.command: /usr/local/bin/migrate-db
+          failed_when: false
+# OCEKIVANI REZULTAT:
+#   become: true, block -> rescue -> always, # failed_when: false,
+#   msg: "Rollback triggered", state: absent.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 34 / 50 — Ansible `lineinfile` & SSH Hardening
+# Precice: ci"  |  ds)  |  yi" + vi"<leader>p  |  gcc
+# ZADATAK:
+#   1. Promeni `"PermitRootLogin yes"` u `"PermitRootLogin no"` i `"PasswordAuthentication yes"` u `"PasswordAuthentication no"`.
+#   2. Skini zagrade oko `("Port 2222")` (`ds)`) -> `"Port 2222"`.
+#   3. Promeni `validate: "true"` u `"/usr/sbin/sshd -t -f %s"`.
+#   4. Kopiraj `"Restart sshd"` iz handlera (`yi"`) i pregazi `notify: "FIXME"` (`vi"<leader>p`), pa zakomentarisi `AllowEmptyPasswords` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Harden OpenSSH on RHEL 9
+  hosts: all
+  become: true
+  tasks:
+    - name: Lock down sshd_config
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        validate: "true"
+      loop:
+        - "PermitRootLogin yes"
+        - "PasswordAuthentication yes"
+        - ("Port 2222")
+        - "AllowEmptyPasswords yes"
+      notify: "FIXME"
+  handlers:
+    - name: "Restart sshd"
+      ansible.builtin.systemd:
+        name: sshd
+        state: restarted
+# OCEKIVANI REZULTAT:
+#   PermitRootLogin no, PasswordAuthentication no, "Port 2222",
+#   # - "AllowEmptyPasswords yes", validate: "/usr/sbin/sshd -t -f %s", notify: "Restart sshd".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 35 / 50 — Ansible `systemd` Servis & Timer + YAML Indent
+# Precice: ci"  |  ciw  |  gcc  |  V + >
+# ZADATAK:
+#   1. Promeni `name: "backup-db.service"` u `"backup-db.timer"`.
+#   2. Postavi `enabled: true`, `daemon_reload: true`, `state: started`.
+#   3. Otkomentarisi `masked: false` (`gcc`).
+#   4. Uvuci `enabled:`, `daemon_reload:`, `state:` i `masked:` na tacno 8 razmaka (ispod `ansible.builtin.systemd:`) sa `V` + `>`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Enable nightly backup timer
+  hosts: db_primary
+  become: true
+  tasks:
+    - name: Start backup timer
+      ansible.builtin.systemd:
+        name: "backup-db.service"
+      enabled: false
+      daemon_reload: false
+      state: stopped
+      # masked: false
+# OCEKIVANI REZULTAT:
+#   8 razmaka za enabled: true, daemon_reload: true, state: started, masked: false.
+
+---
+# ============================================================================
+#  TIER 8: ANSIBLE NAPREDNO — Inventory, Loops, URI, Podman, HAProxy (36-40)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 36 / 50 — Ansible YAML Inventory (`hosts.yml`) Organizacija
+# Precice: <leader>s  |  ds)  |  ci"  |  gcc  |  V + J/K
+# ZADATAK:
+#   1. Zameni sve pojave `lab_dc_36` u `prod_eu1` pomocu `<leader>s`.
+#   2. Skini zagrade sa `ansible_port: (22)` (`ds)`) i promeni `ansible_user: "root"` u `"sre"`.
+#   3. Zakomentarisi `decommissioned-01:` pomocu `gcc`.
+#   4. Poredjaj web hostove po redu: `web01` -> `web02` -> `web03` (`V` + `J`/`K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+all:
+  vars:
+    datacenter: lab_dc_36
+    ansible_port: (22)
+    ansible_user: "root"
+  children:
+    web_lab_dc_36:
+      hosts:
+        web03.lab_dc_36.internal:
+        web01.lab_dc_36.internal:
+        web02.lab_dc_36.internal:
+        decommissioned-01:
+# OCEKIVANI REZULTAT:
+#   prod_eu1 svuda, ansible_port: 22, ansible_user: "sre",
+#   # decommissioned-01:, redosled web01 -> web02 -> web03.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 37 / 50 — Ansible `loop` + `when` + `tags` Optimizacija
+# Precice: ci"  |  V + J/K  |  gcc  |  cs'"
+# ZADATAK:
+#   1. Promeni `when: ansible_os_family == "Debian"` u `"RedHat"`.
+#   2. Poredjaj pakete abecedno: `ca-certificates` -> `curl` -> `jq` -> `tmux` (`V` + `J`/`K`).
+#   3. Zakomentarisi `- "ftp"` pomocu `gcc`.
+#   4. Promeni `tags: ['old']` u `["rhel9", "base"]`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Install RHEL 9 CLI tools
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  when: ansible_os_family == "Debian"
+  tags: ['old']
+  loop:
+    - "tmux"
+    - "ca-certificates"
+    - "jq"
+    - "curl"
+    - "ftp"
+# OCEKIVANI REZULTAT:
+#   "RedHat", tags: ["rhel9", "base"], ca-certificates -> curl -> jq -> tmux, # - "ftp".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 38 / 50 — Ansible `uri` Healthcheck + Retries
+# Precice: ci"  |  ds)  |  <C-a>  |  ciw  |  gcc
+# ZADATAK:
+#   1. Promeni `url: "http://localhost/health"` u `"https://api.prod.internal/health"`.
+#   2. Skini zagrade oko `status_code: (200)` (`ds)`).
+#   3. Povecaj `retries: 1` u `10` (`9<C-a>`) i `delay: 1` u `5` (`4<C-a>`).
+#   4. Postavi `validate_certs: true` i zakomentarisi `ignore_tls_hack: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Wait for API health endpoint
+  ansible.builtin.uri:
+    url: "http://localhost/health"
+    status_code: (200)
+    validate_certs: false
+    ignore_tls_hack: true
+  retries: 1
+  delay: 1
+# OCEKIVANI REZULTAT:
+#   url: "https://api.prod.internal/health", status_code: 200,
+#   validate_certs: true, # ignore_tls_hack: true, retries: 10, delay: 5.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 39 / 50 — Ansible `podman` Rootless Container na RHEL 9
+# Precice: ct:  |  ci"  |  ciw  |  cs'"  |  gcc
+# ZADATAK:
+#   1. Prebaci `docker_container:` u `containers.podman.podman_container:` (`ct:`).
+#   2. Promeni `image: "quay.io/org/agent:dev"` u `"quay.io/org/agent:v2.1"`.
+#   3. Postavi `state: started` i `restart_policy: "always"` (`cs'"`).
+#   4. Promeni `ports: ['9090:9090']` u `["8080:8080"]` i zakomentarisi `privileged: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Run rootless monitoring agent on RHEL 9
+  hosts: edge_nodes
+  tasks:
+    - name: Start agent container
+      docker_container:
+        name: sre-agent
+        image: "quay.io/org/agent:dev"
+        state: stopped
+        restart_policy: 'no'
+        privileged: true
+        ports: ['9090:9090']
+# OCEKIVANI REZULTAT:
+#   containers.podman.podman_container:, image: v2.1, state: started,
+#   restart_policy: "always", ports: ["8080:8080"], # privileged: true.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 40 / 50 — Ansible HAProxy + Keepalived VIP Failover
+# Precice: <leader>s  |  <C-a>  |  ci"  |  gcc  |  V + J/K
+# ZADATAK:
+#   1. Zameni sve pojave `old_vip_40` u `10.50.0.10` pomocu `<leader>s`.
+#   2. Postavi `priority: 150`, `vrrp_state: "MASTER"` i `check_interval: 2`.
+#   3. Zakomentarisi `nopreempt_bug: true` (`gcc`).
+#   4. Pomeri task `Configure haproxy` IZNAD `Configure keepalived` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: HA LoadBalancer pair
+  hosts: lb_nodes
+  vars:
+    vip_address: "old_vip_40"
+    health_bind: "old_vip_40:8404"
+    priority: 100
+    vrrp_state: "BACKUP"
+    check_interval: 10
+    nopreempt_bug: true
+  tasks:
+    - name: Configure keepalived
+      ansible.builtin.template:
+        src: keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+    - name: Configure haproxy
+      ansible.builtin.template:
+        src: haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+# OCEKIVANI REZULTAT:
+#   10.50.0.10 svuda, priority: 150, vrrp_state: "MASTER", check_interval: 2,
+#   # nopreempt_bug: true, Configure haproxy pre Configure keepalived.
+
+---
+# ============================================================================
+#  TIER 9: REALNI INCIDENTI — War Room 03:00 AM Debug Misije (41-45)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 41 / 50 — INCIDENT: CrashLoopBackOff (OOMKilled + Los Probe!)
+# Precice: ci"  |  <C-a>  |  <leader>dd  |  gcc
+# ZADATAK: Servis puca u produkciji svakih 5 sekundi! Popravi sve:
+#   1. Podigni resurse: `memory: "32Mi"` -> `"1Gi"` i `cpu: "50m"` -> `"500m"`.
+#   2. Sredi livenessProbe: `initialDelaySeconds: 1` -> `30`, `periodSeconds: 1` -> `10`, `failureThreshold: 1` -> `5`.
+#   3. Obrisi `memory_leak_sim_41: "yes"` (`<leader>dd`).
+#   4. Zakomentarisi `CRASH_ON_START: "1"` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: orders
+          memory_leak_sim_41: "yes"
+          env:
+            - name: CRASH_ON_START
+              CRASH_ON_START: "1"
+          resources:
+            limits:
+              memory: "32Mi"
+              cpu: "50m"
+          livenessProbe:
+            initialDelaySeconds: 1
+            periodSeconds: 1
+            failureThreshold: 1
+# OCEKIVANI REZULTAT:
+#   memory: "1Gi", cpu: "500m", initialDelaySeconds: 30, periodSeconds: 10,
+#   failureThreshold: 5, memory_leak_sim_41 obrisana, # CRASH_ON_START: "1".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 42 / 50 — INCIDENT: Split-Brain DNS & CoreDNS Loop
+# Precice: <leader>s  |  ds)  |  ciw  |  <C-a>  |  gcc  |  V + K
+# ZADATAK:
+#   1. Zameni sve pojave `broken_dns_42` u `10.96.0.10` pomocu `<leader>s`.
+#   2. Skini zagrade oko `ndots: (2)` (`ds)`) i promeni `dnsPolicy: Default` u `ClusterFirst`.
+#   3. Povecaj `replicas: 1` u `3` (`2<C-a>`) i zakomentarisi `loop_forward: "127.0.0.1"` (`gcc`).
+#   4. Pomeri `upstream_1: "1.1.1.1"` IZNAD `upstream_2: "8.8.8.8"` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+spec:
+  replicas: 1
+  dnsPolicy: Default
+  clusterIP: "broken_dns_42"
+  fallbackIP: "broken_dns_42"
+  ndots: (2)
+  loop_forward: "127.0.0.1"
+  upstreams:
+    upstream_2: "8.8.8.8"
+    upstream_1: "1.1.1.1"
+# OCEKIVANI REZULTAT:
+#   10.96.0.10 svuda, replicas: 3, dnsPolicy: ClusterFirst, ndots: 2,
+#   # loop_forward: "127.0.0.1", upstream_1 iznad upstream_2.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 43 / 50 — INCIDENT: Istekao TLS Sertifikat (cert-manager)
+# Precice: ci"  |  cs'"  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Prebaci `issuerRef.name: 'letsencrypt-staging'` u `"letsencrypt-prod"`.
+#   2. Postavi `duration: "2160h"` i `renewBefore: "360h"`.
+#   3. Promeni `dnsName: "shop.dev.local"` u `"shop.prod.example.com"`.
+#   4. Obrisi `expired_override_43: true` (`<leader>dd`) i zakomentarisi `selfSigned: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: shop-tls
+spec:
+  secretName: shop-tls-secret
+  duration: "24h"
+  renewBefore: "1h"
+  expired_override_43: true
+  selfSigned: true
+  dnsName: "shop.dev.local"
+  issuerRef:
+    kind: ClusterIssuer
+    name: 'letsencrypt-staging'
+# OCEKIVANI REZULTAT:
+#   issuerRef.name: "letsencrypt-prod", duration: "2160h", renewBefore: "360h",
+#   dnsName: "shop.prod.example.com", expired_override_43 obrisana, # selfSigned: true.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 44 / 50 — INCIDENT: Ansible Playbook Bez Zastite na Produkciji
+# Precice: <C-a>  |  ciw  |  gcc  |  yi" + vi"<leader>p  |  V + K
+# ZADATAK:
+#   1. Postavi `serial: 2`, `max_fail_percentage: 10`, `any_errors_fatal: true`.
+#   2. Zakomentarisi `force_reboot_all: true` (`gcc`).
+#   3. Kopiraj `"Verify cluster quorum"` (`yi"`) i pregazi oba `"TODO_CHECK"` sa `vi"<leader>p`.
+#   4. Pomeri `Backup etcd` IZNAD `Upgrade kubeadm` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Safe K8s control-plane upgrade
+  hosts: k8s_masters
+  serial: 100
+  max_fail_percentage: 99
+  any_errors_fatal: false
+  force_reboot_all: true
+  vars:
+    quorum_label: "Verify cluster quorum"
+  pre_tasks:
+    - name: "TODO_CHECK"
+      ansible.builtin.command: /usr/local/bin/check-quorum
+  tasks:
+    - name: Upgrade kubeadm
+      ansible.builtin.dnf:
+        name: kubeadm
+        state: latest
+    - name: Backup etcd
+      ansible.builtin.command: /usr/local/bin/etcd-snap
+  post_tasks:
+    - name: "TODO_CHECK"
+      ansible.builtin.command: /usr/local/bin/check-quorum
+# OCEKIVANI REZULTAT:
+#   serial: 2, max_fail_percentage: 10, any_errors_fatal: true, # force_reboot_all: true,
+#   oba TODO_CHECK -> "Verify cluster quorum", Backup etcd iznad Upgrade kubeadm.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 45 / 50 — INCIDENT: K8s DiskPressure & Evicted Pods
+# Precice: <C-a>  |  ci"  |  ds)  |  gcc  |  V + >
+# ZADATAK:
+#   1. Postavi `imageGCHighThresholdPercent: 80` i `imageGCLowThresholdPercent: 60`.
+#   2. Promeni `nodefs: "1%"` u `"10%"` i skini zagrade oko `maxSize: ("100Mi")` (`ds)`).
+#   3. Zakomentarisi `keep_core_dumps: true` (`gcc`).
+#   4. Uvuci `logging:` pod `kubelet:` (`logging:` na 4 razmaka, `maxSize:` na 6 razmaka) sa `V` + `>`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+spec:
+  kubelet:
+    imageGCHighThresholdPercent: 99
+    imageGCLowThresholdPercent: 95
+    keep_core_dumps: true
+    evictionHard:
+      nodefs: "1%"
+  logging:
+    maxSize: ("100Mi")
+# OCEKIVANI REZULTAT:
+#   80 / 60, nodefs: "10%", # keep_core_dumps: true,
+#   logging: (4 sp), maxSize: "100Mi" (6 sp).
+
+---
+# ============================================================================
+#  TIER 10: GRAND MASTER BOSS GAUNTLETS — Dugi, slozeni SRE izazovi (46-50)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 46 / 50 — BOSS 3: Multi-Container Sidecar + InitContainer Deployment
+# Kombinuj: <leader>s, <C-a>, ci", ciw, ds), gcc, <leader>dd, V+J/K
+# ZADATAK:
+#   1. Zameni sve pojave `beta_mesh_46` u `prod_mesh` (`<leader>s`).
+#   2. Povecaj `replicas: 1` u `4` (`3<C-a>`) i postavi `runAsNonRoot: true`.
+#   3. Promeni envoy image u `"envoyproxy/envoy:v1.31"` i skini zagrade sa `containerPort: (15001)` (`ds)`).
+#   4. Zakomentarisi `ENVOY_LOG_LEVEL: "trace"` (`gcc`) i obrisi `sidecar_junk_46: "bye"` (`<leader>dd`).
+#   5. Poredjaj `containers_order` redom: `init-config` -> `app` -> `envoy-sidecar` (`V` + `J`/`K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-beta_mesh_46
+  namespace: beta_mesh_46
+spec:
+  replicas: 1
+  sidecar_junk_46: "bye"
+  containers_order:
+    - "envoy-sidecar"
+    - "init-config"
+    - "app"
+  template:
+    metadata:
+      labels:
+        mesh: beta_mesh_46
+    spec:
+      securityContext:
+        runAsNonRoot: false
+      containers:
+        - name: envoy-sidecar
+          image: "envoyproxy/envoy:v1.20"
+          ports:
+            - containerPort: (15001)
+          env:
+            - name: ENVOY_LOG_LEVEL
+              ENVOY_LOG_LEVEL: "trace"
+# OCEKIVANI REZULTAT:
+#   prod_mesh svuda, replicas: 4, sidecar_junk_46 obrisana, runAsNonRoot: true,
+#   envoy v1.31, containerPort: 15001, # ENVOY_LOG_LEVEL: "trace",
+#   redosled: init-config -> app -> envoy-sidecar.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 47 / 50 — BOSS 4: Ansible Complete RHEL 9 Web+DB Role Playbook
+# Kombinuj: ciw, ct:, <C-a>, V+J/K, yi"+vi"<leader>p, gcc, <leader>dd
+# ZADATAK:
+#   1. Postavi `hosts: rhel9_prod`, `become: true`, `serial: 1` i `selinux_state: enforcing`.
+#   2. Prebaci `yum:` -> `ansible.builtin.dnf:` i `service:` -> `ansible.builtin.systemd:` (`ct:`).
+#   3. Obrisi `legacy_hack_47: "remove"` (`<leader>dd`) i zakomentarisi `disable_firewall: true` (`gcc`).
+#   4. Kopiraj `"Reload nginx"` iz handlera i pregazi oba `notify: "TODO"` (`yi"` + `vi"<leader>p`).
+#   5. Poredjaj 4 faze u `phases:` redom: `1. Firewall` -> `2. Packages` -> `3. Config` -> `4. Start` (`V` + `J`/`K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Full RHEL 9 Web+DB provisioning
+  hosts: rhel9_dev
+  become: false
+  serial: 5
+  vars:
+    selinux_state: permissive
+    disable_firewall: true
+    legacy_hack_47: "remove"
+    phases:
+      - "3. Config"
+      - "1. Firewall"
+      - "4. Start"
+      - "2. Packages"
+  tasks:
+    - name: Install packages
+      yum:
+        name: nginx
+        state: present
+      notify: "TODO"
+    - name: Ensure service started
+      service:
+        name: nginx
+        state: started
+      notify: "TODO"
+  handlers:
+    - name: "Reload nginx"
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+# OCEKIVANI REZULTAT:
+#   rhel9_prod, become: true, serial: 1, enforcing, # disable_firewall: true,
+#   legacy_hack_47 obrisana, dnf + systemd, 2x notify "Reload nginx", phases 1..4.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 48 / 50 — BOSS 5: K8s Zero-Trust Namespace Pack (Quota + NetPol)
+# Kombinuj: <leader>s, ci", cs'", ds), gcc, <leader>dd
+# ZADATAK:
+#   1. Zameni sve pojave `open_ns_48` u `zero_trust_prod` pomocu `<leader>s`.
+#   2. Postavi `pods: "50"`, `memory: "32Gi"` i `default_cpu: "200m"`.
+#   3. Otkomentarisi `- Egress` (`gcc`), skini zagrade sa `port: (5432)` (`ds)`) i promeni `'TCP'` -> `"TCP"` (`cs'"`).
+#   4. Zakomentarisi `allow_all_internet: true` (`gcc`) i obrisi `quota_bypass_48: true` (`<leader>dd`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-open_ns_48
+  namespace: open_ns_48
+spec:
+  quota_bypass_48: true
+  hard:
+    pods: "999"
+    memory: "1Ti"
+  default_cpu: "10m"
+  networkPolicy:
+    namespace: open_ns_48
+    allow_all_internet: true
+    policyTypes:
+      - Ingress
+      # - Egress
+    egressPort:
+      protocol: 'TCP'
+      port: (5432)
+# OCEKIVANI REZULTAT:
+#   zero_trust_prod svuda, quota_bypass_48 obrisana, pods "50", memory "32Gi",
+#   default_cpu "200m", # allow_all_internet: true, - Egress, "TCP", 5432.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 49 / 50 — BOSS 6: OpenShift + Ansible Disaster Recovery Failover
+# Kombinuj: <leader>s, <C-a>, ciw, V+J/K, gcc, <leader>dd
+# ZADATAK:
+#   1. Zameni sve pojave `dr_old_49` u `dr_frankfurt` (`<leader>s`).
+#   2. Povecaj `replicas: 1` u `6` (`5<C-a>`), `weight: 0` u `100` i `serial: 10` u `1`.
+#   3. Postavi `termination: reencrypt` i `validate_certs: true`.
+#   4. Zakomentarisi `skip_backup_verify: true` (`gcc`) i obrisi `dr_test_junk_49: "x"` (`<leader>dd`).
+#   5. Poredjaj DR korake u `dr_steps:` od 1 do 4 (`V` + `J`/`K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: dr-route-dr_old_49
+  region: dr_old_49
+spec:
+  target_dc: dr_old_49
+  replicas: 1
+  weight: 0
+  serial: 10
+  termination: edge
+  validate_certs: false
+  skip_backup_verify: true
+  dr_test_junk_49: "x"
+  dr_steps:
+    - "3. Switch DNS"
+    - "1. Freeze writes"
+    - "4. Resume traffic"
+    - "2. Promote replica"
+# OCEKIVANI REZULTAT:
+#   dr_frankfurt svuda, replicas: 6, weight: 100, serial: 1, termination: reencrypt,
+#   validate_certs: true, # skip_backup_verify: true, dr_test_junk_49 obrisana, dr_steps 1..4.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 50 / 50 — FINAL GRAND MASTER BOSS: Full SRE Production Cutover!
+# Kombinuj APOSLUTNO SVE: <leader>dd, <leader>s, <C-a>, cs'", ds), gcc,
+#                         V+J/K, yi"+vi"<leader>p, ciw, ci"!
+# ZADATAK:
+#   1. Obrisi `cutover_trash_50: "DELETE_ME"` u void registar (`<leader>dd`).
+#   2. Zameni sve pojave `rc_alpha_50` u `prod_v5` pomocu `<leader>s` (4 pojave!).
+#   3. Povecaj `replicas: 1` -> `8` (`7<C-a>`) i spusti `serial: 5` -> `1`.
+#   4. Sredi surround: `'eu-central-1'` -> `"eu-central-1"`, `("v5.0.0")` -> `"v5.0.0"`, `(8443)` -> `8443`.
+#   5. Upali `runAsNonRoot: true` i `become: true`; zakomentarisi `chaos_mode: true` i `DEBUG_TRACE: "1"` (`gcc`).
+#   6. Poredjaj 4 cutover faze u `cutover_plan:` od 1 do 4 (`V` + `J`/`K`).
+#   7. Kopiraj `"Notify SRE Slack"` (`yi"`) i pregazi oba `notify: "FIXME"` sa `vi"<leader>p`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cutover-rc_alpha_50
+  namespace: rc_alpha_50
+  region: 'eu-central-1'
+  release_tag: ("v5.0.0")
+spec:
+  replicas: 1
+  serial: 5
+  become: false
+  runAsNonRoot: false
+  chaos_mode: true
+  DEBUG_TRACE: "1"
+  cutover_trash_50: "DELETE_ME"
+  image: "ghcr.io/sre/platform:rc_alpha_50"
+  ansible_group: "rc_alpha_50"
+  port: (8443)
+  slack_handler: "Notify SRE Slack"
+  pre_notify: "FIXME"
+  post_notify: "FIXME"
+  cutover_plan:
+    - "4. Full cutover"
+    - "2. DB migration"
+    - "1. Preflight check"
+    - "3. Canary rollout"
+# OCEKIVANI REZULTAT:
+#   cutover_trash_50 obrisana, prod_v5 svuda (4x), replicas: 8, serial: 1,
+#   "eu-central-1", "v5.0.0", 8443, runAsNonRoot: true, become: true,
+#   # chaos_mode: true, # DEBUG_TRACE: "1", oba notify "Notify SRE Slack",
+#   cutover_plan 1..4.
