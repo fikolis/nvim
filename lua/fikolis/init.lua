@@ -62,7 +62,7 @@ autocmd("BufWritePre", {
     group = FikolisGroup,
     pattern = "*",
     callback = function()
-        if not vim.bo.modifiable or vim.bo.filetype == "markdown" or vim.bo.filetype == "diff" then
+        if not vim.bo.modifiable or vim.b.learn_dojo or vim.bo.filetype == "markdown" or vim.bo.filetype == "diff" then
             return
         end
         local view = vim.fn.winsaveview()
@@ -93,3 +93,6 @@ autocmd("LspAttach", {
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
+
+require("fikolis.learn_dojo").setup()
+require("fikolis.learn_grok").setup()

@@ -1,3 +1,8 @@
 .nvimlog
 nvim.log
 neovim-config.md
+
+# Learn Dojo player saves & temp files
+learn_nvim_dojo*.json
+learn_nvim-*.lua
+lua/fikolis/learn_grok.lua
