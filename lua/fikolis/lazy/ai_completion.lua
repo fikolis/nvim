@@ -1,8 +1,7 @@
--- Free AI inline Tab completion via Exafunction/windsurf.nvim (Codeium).
--- First run: execute :Codeium Auth inside Neovim and paste your free Windsurf token.
+-- Free AI inline Tab completion via zbirenbaum/copilot.lua (GitHub Copilot Free: 2,000/month).
+-- First run: enable Copilot Free in GitHub settings, then run :Copilot auth inside Neovim.
 -- Toggle on/off anytime with <leader>ct.
--- Automatically disabled on sensitive DevOps/Ansible/K8s files (secrets, vaults, .env, keys),
--- and filtered out from cross-buffer context as well.
+-- Never attaches to sensitive DevOps/Ansible/K8s files (secrets, vaults, .env, keys).
 -- blink.cmp stays untouched on <C-n>/<C-p>/<C-y>.
 
 local sensitive_patterns = {
@@ -54,73 +53,70 @@ end
 
 return {
     {
-        "Exafunction/windsurf.nvim",
-        dependencies = { "nvim-lua/plenary.nvim" },
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
         event = "InsertEnter",
-        cmd = "Codeium",
         keys = {
-            { "<leader>ct", "<cmd>Codeium Toggle<CR>", desc = "AI: Toggle Tab completion (Windsurf)" },
-        },
-        opts = {
-            enable_cmp_source = false,
-            enable_chat = false,
-            enable_local_search = false,
-            enable_index_service = false,
-            virtual_text = {
-                enabled = true,
-                default_filetype_enabled = true,
-                filetypes = {
-                    oil = false,
-                    fugitive = false,
-                    gitcommit = false,
-                    snacks_picker_input = false,
-                    snacks_terminal = false,
-                    help = false,
-                    qf = false,
-                },
-                idle_delay = 75,
-                map_keys = true,
-                key_bindings = {
-                    accept = "<Tab>",
-                    accept_word = "<C-j>",
-                    accept_line = "<A-a>",
-                    clear = "<C-]>",
-                    next = "<A-]>",
-                    prev = "<A-[>",
-                },
+            {
+                "<leader>ct",
+                function()
+                    require("copilot.suggestion").toggle_auto_trigger()
+                    local state = vim.b.copilot_suggestion_auto_trigger
+                    vim.notify("Copilot Tab completion: " .. (state and "ON" or "OFF"), vim.log.levels.INFO)
+                end,
+                desc = "AI: Toggle Tab completion (Copilot)",
             },
         },
-        config = function(_, opts)
-            require("codeium").setup(opts)
-
-            local vt = require("codeium.virtual_text")
-            -- Since we lazy-load on InsertEnter (after ColorScheme/VimEnter), set ghost-text highlight now
-            vt.set_style()
-
-            -- Block completions on sensitive buffers
-            local orig_ft_enabled = vt.filetype_enabled
-            vt.filetype_enabled = function(bufnr)
-                if is_sensitive_buffer(bufnr) then
+        opts = {
+            panel = { enabled = false },
+            suggestion = {
+                enabled = true,
+                auto_trigger = true,
+                hide_during_completion = true,
+                debounce = 75,
+                keymap = {
+                    -- <Tab> is mapped below with safe fallback to normal <Tab>
+                    accept = false,
+                    accept_word = "<C-j>",
+                    accept_line = "<A-a>",
+                    next = "<A-]>",
+                    prev = "<A-[>",
+                    dismiss = "<C-]>",
+                },
+            },
+            filetypes = {
+                yaml = true,
+                markdown = true,
+                oil = false,
+                fugitive = false,
+                gitcommit = false,
+                gitrebase = false,
+                help = false,
+                qf = false,
+                snacks_picker_input = false,
+                snacks_terminal = false,
+                ["."] = false,
+                ["*"] = true,
+            },
+            should_attach = function(bufnr, _)
+                if not vim.bo[bufnr].buflisted or vim.bo[bufnr].buftype ~= "" then
                     return false
                 end
-                return orig_ft_enabled(bufnr)
-            end
+                return not is_sensitive_buffer(bufnr)
+            end,
+        },
+        config = function(_, opts)
+            require("copilot").setup(opts)
 
-            -- Also prevent sensitive open buffers from being sent as cross-buffer context
-            local util = require("codeium.util")
-            local orig_other_docs = util.get_other_documents
-            util.get_other_documents = function(bufnr)
-                local blocked = {}
-                for _, b in ipairs(vim.api.nvim_list_bufs()) do
-                    if vim.api.nvim_buf_is_loaded(b) and is_sensitive_buffer(b) then
-                        blocked[util.get_uri(vim.api.nvim_buf_get_name(b))] = true
-                    end
+            vim.keymap.set("i", "<Tab>", function()
+                local suggestion = require("copilot.suggestion")
+                if suggestion.is_visible() then
+                    suggestion.accept()
+                    return
                 end
-                local docs = orig_other_docs(bufnr)
-                return vim.tbl_filter(function(doc)
-                    return not blocked[doc.absolute_uri]
-                end, docs)
-            end
+                local tab = vim.api.nvim_replace_termcodes("<Tab>", true, false, true)
+                vim.api.nvim_feedkeys(tab, "in", false)
+            end, { silent = true, desc = "AI: Accept Copilot suggestion or Tab" })
         end,
     },
 }

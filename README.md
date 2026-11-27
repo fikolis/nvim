@@ -115,7 +115,7 @@ Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verif
     ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, claude, grok, opencode, codex)
     ├── lazy_init.lua       # lazy.nvim bootstrap & performance config
     └── lazy/
-        ├── ai_completion.lua # windsurf.nvim (Codeium) free inline Tab completion
+        ├── ai_completion.lua # copilot.lua (GitHub Copilot Free) inline Tab completion
         ├── colors.lua      # rose-pine (transparent) + tokyonight (lazy)
         ├── completion.lua  # blink.cmp + friendly-snippets
         ├── formatting.lua  # conform.nvim
@@ -220,7 +220,7 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `ys`, `cs`, `ds` | Surround add / change / delete (`nvim-surround`) |
 | `gc` / `gcc` | Built-in comment operator / line |
 
-### AI CLI Floats (`Snacks.terminal`) & Inline Tab Completion (`windsurf.nvim`)
+### AI CLI Floats (`Snacks.terminal`) & Inline Tab Completion (`copilot.lua`)
 | Key | Action |
 |---|---|
 | `<leader>ca` | Toggle `agy` floating terminal |
@@ -229,10 +229,10 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `<leader>co` | Toggle `opencode` floating terminal |
 | `<leader>cx` | Toggle `codex` floating terminal |
 | `<C-q>` *(in float)* | Hide AI float without stopping the session (`q` also hides in normal mode) |
-| `<leader>ct` | Toggle Windsurf inline Tab completion on/off (`:Codeium Auth` on first run; auto-disabled on `.env`, vaults, secrets, keys, K8s `kind: Secret`) |
-| `<Tab>` *(insert)* | Accept Windsurf ghost text (falls back to normal `<Tab>` when none is visible) |
-| `<C-j>` / `<A-a>` *(insert)* | Accept next word / line of Windsurf suggestion |
-| `<A-]>` / `<A-[>` / `<C-]>` *(insert)* | Next / previous / dismiss Windsurf suggestion |
+| `<leader>ct` | Toggle Copilot inline Tab completion on/off (`:Copilot auth` on first run; never attaches to `.env`, vaults, secrets, keys, K8s `kind: Secret`) |
+| `<Tab>` *(insert)* | Accept Copilot ghost text (falls back to normal `<Tab>` when none is visible) |
+| `<C-j>` / `<A-a>` *(insert)* | Accept next word / line of Copilot suggestion |
+| `<A-]>` / `<A-[>` / `<C-]>` *(insert)* | Next / previous / dismiss Copilot suggestion |
 
 ### Tmux & Utilities
 | Key | Action |
