@@ -1,7 +1,8 @@
--- Fast, free AI inline Tab completion via supermaven-nvim.
--- First run: execute :SupermavenUseFree inside Neovim to activate the free tier.
+-- Free AI inline Tab completion via Exafunction/windsurf.nvim (Codeium).
+-- First run: execute :Codeium Auth inside Neovim and paste your free Windsurf token.
 -- Toggle on/off anytime with <leader>ct.
--- Automatically disabled on sensitive DevOps/Ansible/K8s files (secrets, vaults, .env, keys).
+-- Automatically disabled on sensitive DevOps/Ansible/K8s files (secrets, vaults, .env, keys),
+-- and filtered out from cross-buffer context as well.
 -- blink.cmp stays untouched on <C-n>/<C-p>/<C-y>.
 
 local sensitive_patterns = {
@@ -25,7 +26,7 @@ local sensitive_patterns = {
 
 local function is_sensitive_buffer(buf)
     buf = buf or 0
-    if vim.bo[buf].buftype ~= "" then
+    if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].buftype ~= "" then
         return true
     end
 
@@ -38,7 +39,6 @@ local function is_sensitive_buffer(buf)
         end
     end
 
-    -- Check first 20 lines for Ansible Vault header or Kubernetes Secret manifests
     local lines = vim.api.nvim_buf_get_lines(buf, 0, 20, false)
     if lines[1] and lines[1]:find("^%$ANSIBLE_VAULT;") then
         return true
@@ -54,47 +54,72 @@ end
 
 return {
     {
-        "supermaven-inc/supermaven-nvim",
+        "Exafunction/windsurf.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
         event = "InsertEnter",
-        cmd = {
-            "SupermavenStart",
-            "SupermavenStop",
-            "SupermavenRestart",
-            "SupermavenToggle",
-            "SupermavenStatus",
-            "SupermavenUseFree",
-            "SupermavenUsePro",
-            "SupermavenLogout",
-        },
+        cmd = "Codeium",
         keys = {
-            { "<leader>ct", "<cmd>SupermavenToggle<CR>", desc = "AI: Toggle Tab completion (Supermaven)" },
+            { "<leader>ct", "<cmd>Codeium Toggle<CR>", desc = "AI: Toggle Tab completion (Windsurf)" },
         },
         opts = {
-            keymaps = {
-                accept_suggestion = "<Tab>",
-                clear_suggestion = "<C-]>",
-                accept_word = "<C-j>",
+            enable_cmp_source = false,
+            enable_chat = false,
+            enable_local_search = false,
+            enable_index_service = false,
+            virtual_text = {
+                enabled = true,
+                default_filetype_enabled = true,
+                filetypes = {
+                    oil = false,
+                    fugitive = false,
+                    gitcommit = false,
+                    snacks_picker_input = false,
+                    snacks_terminal = false,
+                    help = false,
+                    qf = false,
+                },
+                idle_delay = 75,
+                map_keys = true,
+                key_bindings = {
+                    accept = "<Tab>",
+                    accept_word = "<C-j>",
+                    accept_line = "<A-a>",
+                    clear = "<C-]>",
+                    next = "<A-]>",
+                    prev = "<A-[>",
+                },
             },
-            ignore_filetypes = {
-                oil = true,
-                fugitive = true,
-                gitcommit = true,
-                snacks_picker_input = true,
-                snacks_terminal = true,
-                help = true,
-                qf = true,
-            },
-            log_level = "off",
-            disable_inline_completion = false,
-            disable_keymaps = false,
-            condition = function()
-                return is_sensitive_buffer(0)
-            end,
         },
         config = function(_, opts)
-            require("supermaven-nvim").setup(opts)
-            if is_sensitive_buffer(0) then
-                require("supermaven-nvim.api").stop()
+            require("codeium").setup(opts)
+
+            local vt = require("codeium.virtual_text")
+            -- Since we lazy-load on InsertEnter (after ColorScheme/VimEnter), set ghost-text highlight now
+            vt.set_style()
+
+            -- Block completions on sensitive buffers
+            local orig_ft_enabled = vt.filetype_enabled
+            vt.filetype_enabled = function(bufnr)
+                if is_sensitive_buffer(bufnr) then
+                    return false
+                end
+                return orig_ft_enabled(bufnr)
+            end
+
+            -- Also prevent sensitive open buffers from being sent as cross-buffer context
+            local util = require("codeium.util")
+            local orig_other_docs = util.get_other_documents
+            util.get_other_documents = function(bufnr)
+                local blocked = {}
+                for _, b in ipairs(vim.api.nvim_list_bufs()) do
+                    if vim.api.nvim_buf_is_loaded(b) and is_sensitive_buffer(b) then
+                        blocked[util.get_uri(vim.api.nvim_buf_get_name(b))] = true
+                    end
+                end
+                local docs = orig_other_docs(bufnr)
+                return vim.tbl_filter(function(doc)
+                    return not blocked[doc.absolute_uri]
+                end, docs)
             end
         end,
     },
