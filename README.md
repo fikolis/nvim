@@ -112,7 +112,7 @@ Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verif
     ├── init.lua            # Core autocmds, DevOps YAML filetypes, LspAttach keymaps
     ├── set.lua             # Editor options, 0.12 winborder/nohlsearch, 2-space DevOps indent
     ├── remap.lua           # Core motions, clipboard, tmux-sessionizer, builtin undotree
-    ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, grok, opencode, codex)
+    ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, claude, grok, opencode, codex)
     ├── lazy_init.lua       # lazy.nvim bootstrap & performance config
     └── lazy/
         ├── ai_completion.lua # minuet-ai.nvim inline Tab completion + provider switcher
@@ -224,6 +224,7 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | Key | Action |
 |---|---|
 | `<leader>ca` | Toggle `agy` floating terminal |
+| `<leader>cc` | Toggle `claude` floating terminal |
 | `<leader>cg` | Toggle `grok` floating terminal |
 | `<leader>co` | Toggle `opencode` floating terminal |
 | `<leader>cx` | Toggle `codex` floating terminal |
