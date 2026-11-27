@@ -131,19 +131,23 @@ return {
                 filetypes = { "terraform", "terraform-vars", "hcl" },
             })
 
+            local ensure_installed = {
+                "lua_ls",
+                "rust_analyzer",
+                "powershell_es",
+                "bashls",
+                "yamlls",
+                "ansiblels",
+                "terraformls",
+                "dockerls",
+                "jsonls",
+            }
+            if vim.fn.executable("go") == 1 then
+                table.insert(ensure_installed, "gopls")
+            end
+
             require("mason-lspconfig").setup({
-                ensure_installed = {
-                    "lua_ls",
-                    "rust_analyzer",
-                    "powershell_es",
-                    "bashls",
-                    "yamlls",
-                    "ansiblels",
-                    "terraformls",
-                    "dockerls",
-                    "jsonls",
-                    "gopls",
-                },
+                ensure_installed = ensure_installed,
                 automatic_enable = true,
             })
 
