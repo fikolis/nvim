@@ -115,7 +115,7 @@ Open `nvim` and run `:checkhealth nvim-treesitter vim.treesitter mason` to verif
     ├── ai.lua              # Persistent Snacks floating terminal launchers (agy, claude, grok, opencode, codex)
     ├── lazy_init.lua       # lazy.nvim bootstrap & performance config
     └── lazy/
-        ├── ai_completion.lua # minuet-ai.nvim inline Tab completion + provider switcher
+        ├── ai_completion.lua # supermaven-nvim free inline Tab completion
         ├── colors.lua      # rose-pine (transparent) + tokyonight (lazy)
         ├── completion.lua  # blink.cmp + friendly-snippets
         ├── formatting.lua  # conform.nvim
@@ -220,7 +220,7 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `ys`, `cs`, `ds` | Surround add / change / delete (`nvim-surround`) |
 | `gc` / `gcc` | Built-in comment operator / line |
 
-### AI CLI Floats (`Snacks.terminal`) & Inline Tab Completion (`minuet-ai.nvim`)
+### AI CLI Floats (`Snacks.terminal`) & Inline Tab Completion (`supermaven-nvim`)
 | Key | Action |
 |---|---|
 | `<leader>ca` | Toggle `agy` floating terminal |
@@ -229,11 +229,10 @@ Press **`<leader>?`** at any time for a live fuzzy-searchable list of **all** ke
 | `<leader>co` | Toggle `opencode` floating terminal |
 | `<leader>cx` | Toggle `codex` floating terminal |
 | `<C-q>` *(in float)* | Hide AI float without stopping the session (`q` also hides in normal mode) |
-| `<leader>cm` | Switch AI Tab completion provider (`Grok`, `Claude`, `Gemini`, `OpenAI`, `Ollama`, `Off`) |
-| `<leader>ct` | Toggle AI Tab completion on/off |
-| `<Tab>` *(insert)* | Accept AI ghost text (falls back to normal `<Tab>` when none is visible) |
-| `<A-a>` / `<A-w>` *(insert)* | Accept AI suggestion line / word |
-| `<A-]>` / `<A-[>` / `<A-e>` *(insert)* | Next / previous / dismiss AI suggestion |
+| `<leader>ct` | Toggle Supermaven inline Tab completion on/off (`:SupermavenUseFree` on first run; auto-disabled on `.env`, vaults, secrets, keys, K8s `kind: Secret`) |
+| `<Tab>` *(insert)* | Accept Supermaven ghost text (falls back to normal `<Tab>` when none is visible) |
+| `<C-j>` *(insert)* | Accept next word of Supermaven suggestion |
+| `<C-]>` *(insert)* | Dismiss Supermaven suggestion |
 
 ### Tmux & Utilities
 | Key | Action |
