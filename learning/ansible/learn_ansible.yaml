@@ -14,7 +14,9 @@
 #    - `:DojoNew [ime]`     = New Game (novi igrac ili reset)
 #    - `:DojoSave` (ili `:w`) / `:DojoLoad` = Save / Load Game za vise igraca
 #    - `:DojoResetLevel [N]`= vrati samo trenutni/zadati nivo na pocetak
-#    - `:DojoHint`          = objasnjenje (mnemonik) za sve precice u ovom nivou!
+#    - `g?` ili `:DojoHint` = vizuelni obrasci + RESENJE korak po korak za ovaj nivo!
+#    - `:DojoGrammar`       = cela Vim gramatika (Glagol + Opseg + Objekat)
+#    - `:DojoCoach`         = ukljuci/iskljuci live vizuelni HUD dok kucas precice (ON)
 #    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
 #
 #  Brzi recnik mnemonika ([v/c/d/y] + [i=inside / a=around] + [w/"/'/(/{]):
