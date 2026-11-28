@@ -14,7 +14,15 @@
 #    - `:DojoNew [ime]`     = New Game (novi igrac ili reset)
 #    - `:DojoSave` (ili `:w`) / `:DojoLoad` = Save / Load Game za vise igraca
 #    - `:DojoResetLevel [N]`= vrati samo trenutni/zadati nivo na pocetak
+#    - `:DojoHint`          = objasnjenje (mnemonik) za sve precice u ovom nivou!
 #    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
+#
+#  Brzi recnik mnemonika (kako da zapamtis precice):
+#    ciw = Change Inner Word       | ct: = Change Till ':'       | ci" = Change Inner "..."
+#    yi" = Yank Inner "..."        | vi"<leader>p = Visual Inner + Paste bez gubitka yanka
+#    ysiw" = Add Surround Inner Word " | cs'" = Change Surround ' -> " | ds) = Delete Surround )
+#    gcc = komentar linije         | <leader>dd = obrisi u crnu rupu | <leader>s = zameni rec svuda
+#    V+J/K = Visual line gore/dole | V+> = Visual line uvuci (2 sp)  | <C-y> = potvrdi autocomplete
 # ============================================================================
 
 # ============================================================================
@@ -24,6 +32,7 @@
 # ----------------------------------------------------------------------------
 # NIVO 01 / 25 — Playbook Header (`ciw`, `<leader>dd`)
 # Precice: ciw  |  <leader>dd
+# HINT: `ciw` = Change Inner Word (promeni rec pod kursorom) | `<leader>dd` = Delete liniju u crnu rupu
 # ZADATAK:
 #   1. Promeni `hosts: dev_servers` u `prod_web`.
 #   2. Promeni `become: false` u `true`.
@@ -42,6 +51,7 @@
 # ----------------------------------------------------------------------------
 # NIVO 02 / 25 — RHEL 9 FQCN Migracija (Probaj `ansiblels` autocomplete!)
 # Precice: ct: + kucaj `ansible.builtin.` + `<C-y>`
+# HINT: `ct:` = Change Till `:` (obrisi sve do dvotacke i udji u Insert!) | `<C-n>`/`<C-p>` = listaj | `<C-y>` = potvrdi
 # ZADATAK: Pretvori stare kratke module u moderne FQCN module sa `ct:`:
 #   1. `yum:` -> `ansible.builtin.dnf:`
 #   2. `service:` -> `ansible.builtin.systemd:`
@@ -91,6 +101,7 @@
 # ----------------------------------------------------------------------------
 # NIVO 04 / 25 — Jinja2 & Mode Surround (`ys`, `cs'"`, `ds)`)
 # Precice: cs'"  |  ds)  |  ciw
+# HINT: `ysiw"` = You Surround Inner Word sa `"` | `cs'"` = Change Surround `'` u `"` | `ds)` = Delete Surround `)` (obrisi okruzeno)
 # ZADATAK:
 #   1. Obavij `app_src` u Jinja2 string `"{{ app_src }}"`.
 #   2. Promeni `'/etc/nginx/conf.d/app.conf'` u `"/etc/nginx/conf.d/app.conf"` (`cs'"`).
@@ -110,6 +121,7 @@
 # ----------------------------------------------------------------------------
 # NIVO 05 / 25 — Handlers & Notify (`yi"`, `vi"<leader>p`, `ciw`)
 # Precice: yi"  |  vi"<leader>p  |  ciw + <C-y>
+# HINT: `yi"` = Yank Inner "..." | `vi"<leader>p` = Visual Inner "..." pa Paste bez gubitka yanka!
 # ZADATAK:
 #   1. Kopiraj `"Restart nginx"` iz handlera sa `yi"`.
 #   2. Pregazi oba `notify: "TODO"` sa `vi"<leader>p`.

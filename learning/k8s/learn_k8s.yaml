@@ -13,7 +13,15 @@
 #    - `:DojoNew [ime]`     = New Game (novi igrac ili reset)
 #    - `:DojoSave` (ili `:w`) / `:DojoLoad` = Save / Load Game za vise igraca
 #    - `:DojoResetLevel [N]`= vrati samo trenutni/zadati nivo na pocetak
+#    - `:DojoHint`          = objasnjenje (mnemonik) za sve precice u ovom nivou!
 #    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
+#
+#  Brzi recnik mnemonika (kako da zapamtis precice):
+#    ciw = Change Inner Word       | ci" = Change Inner "..."    | f5r7 = Find '5', Replace '7'
+#    yi" = Yank Inner "..."        | vi"<leader>p = Visual Inner + Paste bez gubitka yanka
+#    ysiw" = Add Surround Inner Word " | cs'" = Change Surround ' -> " | ds) = Delete Surround )
+#    gcc = komentar linije         | V2jgc = Visual + 2 dole + komentar | <leader>dd = obrisi u crnu rupu
+#    V+J/K = Visual line gore/dole | V+> = Visual line uvuci     | <leader>s = zameni rec svuda
 # ============================================================================
 
 ---
@@ -24,6 +32,7 @@
 # ----------------------------------------------------------------------------
 # NIVO 01 / 25 — Deployment Scale & Image Bump (Probaj K8s LSP autocomplete!)
 # Precice: 2<leader>+  |  f5r7  |  ciw + <C-n>/<C-y>
+# HINT: `f5r7` = Find '5' pa Replace sa '7' | `ciw` = Change Inner Word | `2<leader>+` = povecaj broj za +2
 # ZADATAK:
 #   1. Na `replicas: 1` pritisni `2<leader>+` -> `3`.
 #   2. Na `image: "nginx:1.25"` promeni tag u `nginx:1.27` (`f5r7` ili `f2` pa `2<leader>+`).
@@ -49,6 +58,7 @@ spec:
 # ----------------------------------------------------------------------------
 # NIVO 02 / 25 — ConfigMap Env Vars: Paste bez gubitka yanka
 # Precice: yi"  |  vi"<leader>p
+# HINT: `yi"` = Yank Inner "..." (kopiraj unutar navodnika) | `vi"` = Visual Inner "..." | `<leader>p` = Paste bez gubitka yanka
 # ZADATAK:
 #   1. Kopiraj `"production"` iz `CLUSTER_ENV` sa `yi"`.
 #   2. Pregazi `"dev"`, `"staging"` i `"local"` sa `vi"<leader>p` bez ponovnog kopiranja!
@@ -69,6 +79,7 @@ data:
 # ----------------------------------------------------------------------------
 # NIVO 03 / 25 — Container Ports & ReadinessProbe (`gcc` / `V2jgc`)
 # Precice: gcc  |  V2jgc
+# HINT: `gcc` = toggle komentar 1 linije | `V2jgc` = Visual Line + 2 linije dole + toggle komentar
 # ZADATAK:
 #   1. Zakomentarisi debug port `containerPort: 9999` pomocu `gcc`.
 #   2. Otkomentarisi sve 3 linije `readinessProbe` odjednom (`V2jgc`).
@@ -140,6 +151,7 @@ spec:
 # ----------------------------------------------------------------------------
 # NIVO 06 / 25 — ConfigMap Surround (`ysiw"`, `cs'"`, `ds)`)
 # Precice: ysiw"  |  cs'"  |  ds)
+# HINT: `ysiw"` = You Surround Inner Word sa `"` | `cs'"` = Change Surround `'` u `"` | `ds)` = Delete Surround `)` (obrisi okruzeno)
 # ZADATAK:
 #   1. Stavi `eu_central` u duple navodnike (`ysiw"`) -> `"eu_central"`.
 #   2. Promeni `'8080'` u `"8080"` sa `cs'"`.
@@ -160,6 +172,7 @@ data:
 # ----------------------------------------------------------------------------
 # NIVO 07 / 25 — Resources Void Delete (`yi"`, `<leader>dd`, `vi"<leader>p`)
 # Precice: yi"  |  <leader>dd  |  vi"<leader>p
+# HINT: `<leader>dd` = Delete liniju u crnu rupu (ne brise ono sto si kopirao sa `yi"`!)
 # ZADATAK:
 #   1. Kopiraj `"512Mi"` iz `requests.memory` sa `yi"`.
 #   2. Obrisi `ephemeral-storage: "OBRISI_ME"` u void registar (`<leader>dd`).
@@ -185,6 +198,7 @@ spec:
 # ----------------------------------------------------------------------------
 # NIVO 08 / 25 — YAML Indent Popravka (`V` + `>` / `<`)
 # Precice: V  |  > (uvuci 2 razmaka)  |  < (izvuci)
+# HINT: `V` = Visual Line selekcija | `>` = uvuci udesno (2 razmaka u YAML-u) | `.` = ponovi poslednji potez!
 # ZADATAK:
 #   1. Uvuci `requests:` na tacno 4 razmaka (ispod `resources:`).
 #   2. Uvuci `cpu: "250m"` i `memory: "256Mi"` na tacno 6 razmaka.

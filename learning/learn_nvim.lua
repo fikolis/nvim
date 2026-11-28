@@ -8,6 +8,7 @@
 --       Delimican napredak je • i n/m. Winbar pokazuje skor i sta fali.
 --    4. `:Dojo` lista sve nivoe. `:DojoNext` skace na prvi nedovrsen.
 --       `:DojoGames` bira igru (Lua Core 33 | K8s 25 | Ansible 25).
+--       `:DojoHint` objasnjava mnemonike za sve precice u trenutnom nivou!
 --    5. Vise igraca (Save / New / Load Game):
 --         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/33)
 --         - `:DojoSave [ime]` (ili `:w`) = Save Game (cuva napredak + kod, fajl na disku ostaje cist!)
@@ -226,6 +227,7 @@ local nivo_10_server = {
 -- ----------------------------------------------------------------------------
 -- NIVO 11 / 33 — Dodaj okruzivanje (`ys`)
 -- Precice: ysiw"  |  ysiw'  |  ysiw)  |  yss)
+-- HINT: `ys` = You Surround (dodaj okruzenje) | `ysiw"` = You Surround Inner Word sa `"` | `yss)` = celu liniju u `()`
 -- Par: 12 poteza
 -- ZADATAK:
 --   1. Stani na `eu_west` -> `ysiw"` da postane `"eu_west"` (vec je unutar
@@ -248,6 +250,7 @@ local nivo_11_sum = x + y * 2
 -- ----------------------------------------------------------------------------
 -- NIVO 12 / 33 — Promeni okruzivanje (`cs`)
 -- Precice: cs"'  |  cs'"  |  cs)}  |  cs])
+-- HINT: `cs` = Change Surround (promeni okruzenje) | `cs'"` = Change Surround `'` u `"` | `cs)}` = `()` u `{}`
 -- Par: 9 poteza
 -- ZADATAK:
 --   1. Promeni `'ansible'` -> `"ansible"` pomocu `cs'"`.
@@ -267,6 +270,7 @@ local nivo_12_c = ("packer")
 -- ----------------------------------------------------------------------------
 -- NIVO 13 / 33 — Obrisi okruzivanje (`ds`)
 -- Precice: ds"  |  ds)  |  ds}
+-- HINT: `ds` = Delete Surround (obrisi okruzeno!) | `ds)` = skini zagrade `()` | `ds"` = skini navodnike `""`
 -- Par: 9 poteza
 -- ZADATAK:
 --   1. Skini spoljne zagrade oko `(42)` sa `ds)`.
@@ -334,6 +338,7 @@ end
 -- ----------------------------------------------------------------------------
 -- NIVO 16 / 33 — Unutrasnjost funkcije (`if` = `@function.inner`)
 -- Precice: dif (obrisi telo funkcije)  |  cif (zameni telo funkcije)
+-- HINT: `d` = Delete, `c` = Change, `i` = Inner, `f` = Function -> `cif` = Change Inner Function (zameni telo!)
 -- Par: 3 poteza (`cif` + nova linija)
 -- ZADATAK: Stani bilo gde unutar `nivo_16_bloated` i zameni CELO telo
 --          funkcije jednom linijom: `return a + b` koristeci `cif`!
@@ -354,6 +359,7 @@ end
 -- ----------------------------------------------------------------------------
 -- NIVO 17 / 33 — Cela funkcija (`af` = `@function.outer`)
 -- Precice: daf (obrisi celu funkciju)  |  yaf (kopiraj celu funkciju)
+-- HINT: `a` = Around (ceo objekat sa omotacem) -> `daf` = Delete Around Function | `yaf` = Yank Around Function
 -- Par: 3 poteza (`daf`)
 -- ZADATAK: Stani bilo gde u funkciji `nivo_17_deprecated` i obrisi je
 --          KOMPLETNO (od `local function` do `end`) jednim potezom: `daf`!
@@ -373,6 +379,7 @@ end
 -- ----------------------------------------------------------------------------
 -- NIVO 18 / 33 — Parametri funkcije (`ia` / `aa` = `@parameter.inner/outer`)
 -- Precice: cia (promeni argument)  |  daa (obrisi parametar + zarez!)
+-- HINT: `a` = Argument/Parameter -> `cia` = Change Inner Argument | `daa` = Delete Around Argument (brise i zarez!)
 -- Par: 8 poteza
 -- ZADATAK:
 --   1. U definiciji `nivo_18_deploy`, obrisi parametar `unused_flag` pomocu

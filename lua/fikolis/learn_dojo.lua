@@ -1892,6 +1892,81 @@ function M.next()
     end
 end
 
+local HINTS = {
+    { pat = "ysiw", text = 'ysiw"   = You Surround Inner Word — obavij rec pod kursorom (npr. ysiw" -> "rec")' },
+    { pat = "yss", text = "yss)    = You Surround Line — obavij celu liniju u zagrade" },
+    { rx = "%f[%w]ys[%w\"'%(%)%{%}%[%]<]", text = 'ys<m><c>= You Surround — dodaj okruzenje oko motion-a (npr. ysiw" ili ys3w))' },
+    { rx = "%f[%w]cs[\"'%(%)%{%}%[%]<>]", text = "cs'\"    = Change Surround — promeni okruzenje (npr. cs'\" menja ' u \", cs)} menja () u {})" },
+    { rx = "%f[%w]ds[\"'%(%)%{%}%[%]<>]", text = 'ds)     = Delete Surround — obrisi okruzujuce karaktere (ds) skida (), ds" skida "")' },
+    { rx = "%f[%w]ciw%f[^%w]", text = "ciw     = Change Inner Word — obrisi rec pod kursorom i udji u Insert mod" },
+    { pat = 'ci"', text = 'ci"     = Change Inner "..." — obrisi sve unutar navodnika i udji u Insert mod' },
+    { pat = "ct:", text = "ct:     = Change Till ':' — obrisi sve od kursora DO dvotacke i udji u Insert mod" },
+    { pat = 'yi"', text = 'yi"     = Yank Inner "..." — kopiraj tekst unutar navodnika (bez samih navodnika)' },
+    { rx = "%f[%w]yiw%f[^%w]", text = "yiw     = Yank Inner Word — kopiraj rec pod kursorom" },
+    { pat = "<leader>p", text = 'vi"<leader>p = Visual Inner "..." + Paste bez gubitka yanka (stari yank ostaje u registru!)' },
+    { pat = "<leader>dd", text = "<leader>dd   = Delete u crnu rupu (void registar — ne gazi ono sto si kopirao!)" },
+    { rx = "<leader>d%f[^%w]", text = "<leader>d    = Delete u crnu rupu (void registar — ne gazi clipboard/yank!)" },
+    { rx = "<leader>s%f[^%w]", text = "<leader>s    = Search & Replace reci pod kursorom SVUDA u fajlu odjednom" },
+    { pat = "<leader>+", text = "<broj><leader>+ / - = Increment / Decrement broja (tmux-safe zamena za <C-a>/<C-x>)" },
+    { rx = "%f[%w]gcc%f[^%w]", text = "gcc     = Toggle Comment na jednoj liniji" },
+    { rx = "%f[%w]V?%d*[jk]?gc%f[^%w]", text = "V2jgc   = Visual Line + 2 dole + Toggle Comment na celom bloku" },
+    { rx = "%f[%w]V%f[^%w].-[JK]", text = "V + J/K = Visual Line selekcija + pomeri linije dole (J) / gore (K)" },
+    { rx = "%f[%w]V%f[^%w].-[%s,`']>", text = "V + >/< = Visual Line selekcija + uvuci (>) / izvuci (<) za 2 razmaka" },
+    { pat = "f5r7", text = "f<c>r<x>= Find karakter <c> u liniji + Replace sa <x> (bez ulaska u Insert mod!)" },
+    { rx = "%f[%w]cif%f[^%w]", text = "cif     = Change Inner Function — zameni CELO telo funkcije (Treesitter)" },
+    { rx = "%f[%w]daf%f[^%w]", text = "daf     = Delete Around Function — obrisi celu funkciju od local do end (Treesitter)" },
+    { rx = "%f[%w]yaf%f[^%w]", text = "yaf     = Yank Around Function — kopiraj celu funkciju od local do end (Treesitter)" },
+    { rx = "%f[%w]vaf%f[^%w]", text = "vaf     = Visual Around Function — selektuj celu funkciju (pa J/K ili <leader>f)" },
+    { rx = "%f[%w]cia%f[^%w]", text = "cia     = Change Inner Argument — promeni parametar/argument funkcije (Treesitter)" },
+    { rx = "%f[%w]daa%f[^%w]", text = "daa     = Delete Around Argument — obrisi argument ZAJEDNO sa zarezom (Treesitter)" },
+    { pat = "]f", text = "]f / [f = Skok na sledecu / prethodnu funkciju (Treesitter)" },
+    { pat = "<C-c>", text = "<C-c>   = Brzi izlaz iz Insert moda (remap za <Esc>)" },
+    { pat = "<C-y>", text = "<C-n>/<C-p> + <C-y> = Listaj autocomplete predloge i potvrdi izbor (blink.cmp)" },
+    { rx = "<leader>f%f[^%w]", text = "<leader>f = Formatiraj bafer ili Visual selekciju (Conform)" },
+    { rx = "<leader>u%f[^%w]", text = "<leader>u = Otvori Undotree (sve grane istorije izmena)" },
+}
+
+function M.hint()
+    local buf = current_dojo()
+    if not buf then
+        vim.notify("Otvori igru sa :DojoGames.", vim.log.levels.WARN)
+        return
+    end
+    local game = ensure_game_for_buf(buf) or active_game(buf)
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+    local level_id = section_at(buf, vim.api.nvim_win_get_cursor(0)[1])
+    if not level_id then
+        vim.notify("Stani unutar nekog nivoa pa pokreni :DojoHint.", vim.log.levels.INFO)
+        return
+    end
+    local s, e = level_range(lines, level_id, game.comment)
+    if not s then
+        return
+    end
+    local header_block = {}
+    for i = s, e do
+        if lines[i]:match("^" .. game.comment .. " IGRAJ OVDE:") then
+            break
+        end
+        header_block[#header_block + 1] = lines[i]
+    end
+    local blob = table.concat(header_block, "\n")
+    local matched = {}
+    local seen = {}
+    for _, h in ipairs(HINTS) do
+        local hit = h.rx and (blob:find(h.rx) ~= nil) or (h.pat and blob:find(h.pat, 1, true) ~= nil)
+        if hit and not seen[h.text] then
+            seen[h.text] = true
+            matched[#matched + 1] = "  • " .. h.text
+        end
+    end
+    if #matched == 0 then
+        vim.notify(string.format("Nivo %02d: koristi :Dojo za status ili <Space>? za sve precice.", level_id), vim.log.levels.INFO)
+        return
+    end
+    vim.notify(string.format("HINT — Nivo %02d (%s):\n%s", level_id, game.title, table.concat(matched, "\n")), vim.log.levels.INFO)
+end
+
 function M.reset_text()
     local buf = current_dojo()
     if not buf then
@@ -2463,6 +2538,7 @@ function M.setup()
     end
 
     vim.api.nvim_create_user_command("Dojo", M.status, { desc = "Learn dojo: status svih nivoa" })
+    vim.api.nvim_create_user_command("DojoHint", M.hint, { desc = "Learn dojo: mnemonici/hintovi za trenutni nivo" })
     vim.api.nvim_create_user_command("DojoGames", function(opts)
         M.games(opts.args ~= "" and opts.args or nil)
     end, { nargs = "?", complete = complete_games, desc = "Learn dojo: izaberi igru (Lua Core / DevOps YAML)" })
