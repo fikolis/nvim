@@ -23,6 +23,12 @@
 --    9. Ne pritiskaj `<leader><leader>` ovde — source bi pokvario vezbu.
 --   10. Leader je <Space>. Podsetnik: `<leader>?`
 --
+--  Brzi recnik mnemonika (Vim gramatika: [glagol] + [i=inside / a=around] + [objekat]):
+--    vi" = Visual Inside " " | ci' = Change Inside ' ' | ci" = Change Inside " " | ciw = Change Inside Word
+--    yi" = Yank Inside " "   | di" = Delete Inside " " | vi"<leader>p = selektuj pa paste bez gubitka yanka
+--    ysiw" = You Surround Inside Word " | cs'" = Change Surround ' -> " | ds) = Delete Surround )
+--    cif/daf/yaf = Change/Delete/Yank Function | cia/daa = Change/Delete Argument
+--
 --  Zasto `.lua` umesto `.txt`?
 --    Zato sto u `.lua` fajlu REALNO rade Treesitter (`af`/`if`/`aa`/`ia`/`]f`),
 --    LSP (`gd`, `K`, `<leader>vrn`, `[d`/`]d`), `gcc` komentari, Trouble i
@@ -109,6 +115,7 @@ local nivo_04_pipeline = {
 -- ----------------------------------------------------------------------------
 -- NIVO 05 / 33 — Brzi izlaz iz Insert moda sa <C-c>
 -- Precice: ci"  |  <C-c> (tvoj remap za <Esc> u Insert modu)
+-- HINT: `ci"` = Change Inside " " (obrisi tekst unutar navodnika i udji u Insert; isto za `ci'` = Change Inside ' ')
 -- Par: 6 poteza (bez teksta)
 -- ZADATAK:
 --   1. Promeni `"BROKEN"` u `"HEALTHY"` pomocu `ci"`.
@@ -130,6 +137,7 @@ local nivo_05_version = "v0.0.1"
 -- ----------------------------------------------------------------------------
 -- NIVO 06 / 33 — Paste bez gubljenja yanka ("greatest remap ever")
 -- Precice: yi"  |  vi"  |  <leader>p  (`"_dP` u Visual modu)
+-- HINT: `yi"` = Yank Inside " " | `vi"` = Visual Inside " " | `<leader>p` = Paste bez gubitka yanka
 -- Par: 12 poteza
 -- ZADATAK: Kopiraj `"8443"` sa `yi"`, pa zameni SVE TRI pogresne vrednosti
 --          (`"8080"`, `"9000"`, `"3000"`) koristeci `vi"<leader>p` — BEZ
@@ -151,6 +159,7 @@ local nivo_06_ports = {
 -- ----------------------------------------------------------------------------
 -- NIVO 07 / 33 — Brisanje u "crnu rupu" (Void Register)
 -- Precice: yiw  |  <leader>d  (`"_d` u Normal/Visual modu)  |  p
+-- HINT: `yiw` = Yank Inside Word | `viw` = Visual Inside Word | `<leader>dd` = Delete liniju u crnu rupu
 -- Par: 10 poteza
 -- ZADATAK:
 --   1. Kopiraj rec `prod_secret_key` sa `yiw`.
@@ -171,6 +180,7 @@ local nivo_07_target = "FIXME"
 -- ----------------------------------------------------------------------------
 -- NIVO 08 / 33 — System Clipboard Yank
 -- Precice: <leader>y  |  <leader>Y
+-- HINT: `vi"` = Visual Inside " " (selektuj sve unutar duplih navodnika) | `<leader>y` = Yank u sistemski clipboard
 -- ZADATAK:
 --   1. Stani na liniju ispod i pritisni `<leader>Y` (kopira celu liniju u
 --      macOS clipboard — mozes da probas Cmd+V u drugom prozoru!).

@@ -17,12 +17,13 @@
 #    - `:DojoHint`          = objasnjenje (mnemonik) za sve precice u ovom nivou!
 #    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
 #
-#  Brzi recnik mnemonika (kako da zapamtis precice):
-#    ciw = Change Inner Word       | ct: = Change Till ':'       | ci" = Change Inner "..."
-#    yi" = Yank Inner "..."        | vi"<leader>p = Visual Inner + Paste bez gubitka yanka
-#    ysiw" = Add Surround Inner Word " | cs'" = Change Surround ' -> " | ds) = Delete Surround )
-#    gcc = komentar linije         | <leader>dd = obrisi u crnu rupu | <leader>s = zameni rec svuda
-#    V+J/K = Visual line gore/dole | V+> = Visual line uvuci (2 sp)  | <C-y> = potvrdi autocomplete
+#  Brzi recnik mnemonika ([v/c/d/y] + [i=inside / a=around] + [w/"/'/(/{]):
+#    vi" = Visual Inside " "       | ci' = Change Inside ' '     | ci" = Change Inside " "
+#    ciw = Change Inside Word      | ct: = Change Till ':'       | yi" = Yank Inside " "
+#    vi"<leader>p = Visual Inside " " + Paste bez gubitka yanka  | <leader>dd = obrisi u crnu rupu
+#    ysiw" = You Surround Word "   | cs'" = Change Surround '->" | ds) = Delete Surround )
+#    gcc = komentar linije         | <leader>s = zameni rec svuda| <C-y> = potvrdi autocomplete
+#    V+J/K = Visual line gore/dole | V+> = Visual line uvuci (2 sp)
 # ============================================================================
 
 # ============================================================================

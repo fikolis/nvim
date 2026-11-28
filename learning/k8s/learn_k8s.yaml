@@ -16,12 +16,13 @@
 #    - `:DojoHint`          = objasnjenje (mnemonik) za sve precice u ovom nivou!
 #    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
 #
-#  Brzi recnik mnemonika (kako da zapamtis precice):
-#    ciw = Change Inner Word       | ci" = Change Inner "..."    | f5r7 = Find '5', Replace '7'
-#    yi" = Yank Inner "..."        | vi"<leader>p = Visual Inner + Paste bez gubitka yanka
-#    ysiw" = Add Surround Inner Word " | cs'" = Change Surround ' -> " | ds) = Delete Surround )
-#    gcc = komentar linije         | V2jgc = Visual + 2 dole + komentar | <leader>dd = obrisi u crnu rupu
-#    V+J/K = Visual line gore/dole | V+> = Visual line uvuci     | <leader>s = zameni rec svuda
+#  Brzi recnik mnemonika ([v/c/d/y] + [i=inside / a=around] + [w/"/'/(/{]):
+#    vi" = Visual Inside " "       | ci' = Change Inside ' '     | ci" = Change Inside " "
+#    ciw = Change Inside Word      | yi" = Yank Inside " "       | f5r7 = Find '5', Replace '7'
+#    vi"<leader>p = Visual Inside " " + Paste bez gubitka yanka  | <leader>dd = obrisi u crnu rupu
+#    ysiw" = You Surround Word "   | cs'" = Change Surround '->" | ds) = Delete Surround )
+#    gcc = komentar linije         | V2jgc = Visual + 2 dole + komentar | <leader>s = zameni rec svuda
+#    V+J/K = Visual line gore/dole | V+> = Visual line uvuci     | 2<leader>+ = povecaj broj (+2)
 # ============================================================================
 
 ---
