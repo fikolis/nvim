@@ -7,7 +7,7 @@
 --    3. Provera je automatska. Kad nivo prodje, pored naslova stane ✓.
 --       Delimican napredak je • i n/m. Winbar pokazuje skor i sta fali.
 --    4. `:Dojo` lista sve nivoe. `:DojoNext` skace na prvi nedovrsen.
---       `:DojoGames` bira igru (Lua Core 33 nivoa <-> DevOps YAML 50 nivoa).
+--       `:DojoGames` bira igru (Lua Core 33 | K8s 25 | Ansible 25).
 --    5. Vise igraca (Save / New / Load Game):
 --         - `:DojoNew [ime]`  = New Game (novi igrac ili pocetak od 0/33)
 --         - `:DojoSave [ime]` (ili `:w`) = Save Game (cuva napredak + kod, fajl na disku ostaje cist!)

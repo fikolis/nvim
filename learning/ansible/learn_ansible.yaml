@@ -1,0 +1,727 @@
+---
+# ============================================================================
+#  NEOVIM ANSIBLE & RHEL 9 DOJO — 25 NIVOA (PRAVI `ansiblels` AUTOCOMPLETE!)
+# ============================================================================
+#  Zasto u `learning/ansible/`?
+#    Tvoj config automatski prepoznaje `**/*ansible*/*.yaml` kao `yaml.ansible`
+#    i pali `ansiblels` — pa rade pravi autocomplete za `ansible.builtin.*`,
+#    `ansible.posix.*`, `state:` vrednosti (`present`/`started`/`enforcing`),
+#    `K` hover dokumentacija i validacija!
+#
+#  Komande:
+#    - `:DojoGames`         = menjaj igru (Lua Core 33 | K8s 25 | Ansible 25)
+#    - `:Dojo` / `:DojoNext`= status svih nivoa / skok na sledeci nedovrsen
+#    - `:DojoNew [ime]`     = New Game (novi igrac ili reset)
+#    - `:DojoSave` (ili `:w`) / `:DojoLoad` = Save / Load Game za vise igraca
+#    - `:DojoResetLevel [N]`= vrati samo trenutni/zadati nivo na pocetak
+#    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
+# ============================================================================
+
+# ============================================================================
+#  TIER 1: ANSIBLE OSNOVE — Header, FQCN, Redosled, Jinja2 & Handlers (1-6)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 01 / 25 — Playbook Header (`ciw`, `<leader>dd`)
+# Precice: ciw  |  <leader>dd
+# ZADATAK:
+#   1. Promeni `hosts: dev_servers` u `prod_web`.
+#   2. Promeni `become: false` u `true`.
+#   3. Promeni `remote_user: ops` u `ansible`.
+#   4. Obrisi liniju `junk_option: remove_me` sa `<leader>dd`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Configure RHEL 9 web tier
+  hosts: dev_servers
+  become: false
+  remote_user: ops
+  junk_option: remove_me
+  gather_facts: true
+# OCEKIVANI REZULTAT: hosts: prod_web, become: true, remote_user: ansible, junk obrisana.
+
+# ----------------------------------------------------------------------------
+# NIVO 02 / 25 — RHEL 9 FQCN Migracija (Probaj `ansiblels` autocomplete!)
+# Precice: ct: + kucaj `ansible.builtin.` + `<C-y>`
+# ZADATAK: Pretvori stare kratke module u moderne FQCN module sa `ct:`:
+#   1. `yum:` -> `ansible.builtin.dnf:`
+#   2. `service:` -> `ansible.builtin.systemd:`
+#   3. `copy:` -> `ansible.builtin.template:`
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 FQCN migration
+  hosts: prod_web
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+    - name: Render nginx config
+      copy:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+    - name: Ensure nginx is running
+      service:
+        name: nginx
+        state: started
+# OCEKIVANI REZULTAT: ansible.builtin.dnf:, ansible.builtin.template:, ansible.builtin.systemd:
+
+# ----------------------------------------------------------------------------
+# NIVO 03 / 25 — Task Reordering (`V` + `J`/`K`)
+# Precice: V2j  |  J / K
+# ZADATAK: Poredjaj 3 taska u redosled: Install -> Deploy -> Start (`V` + `J`/`K`)!
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Ordered deploy
+  hosts: prod_web
+  tasks:
+    - name: Start and enable nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+    - name: Install nginx package
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+    - name: Deploy nginx config
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+# OCEKIVANI REZULTAT: Install -> Deploy -> Start.
+
+# ----------------------------------------------------------------------------
+# NIVO 04 / 25 — Jinja2 & Mode Surround (`ys`, `cs'"`, `ds)`)
+# Precice: cs'"  |  ds)  |  ciw
+# ZADATAK:
+#   1. Obavij `app_src` u Jinja2 string `"{{ app_src }}"`.
+#   2. Promeni `'/etc/nginx/conf.d/app.conf'` u `"/etc/nginx/conf.d/app.conf"` (`cs'"`).
+#   3. Skini zagrade oko `("0644")` sa `ds)` -> `"0644"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Deploy app vhost
+  hosts: prod_web
+  tasks:
+    - name: Render vhost template
+      ansible.builtin.template:
+        src: app_src
+        dest: '/etc/nginx/conf.d/app.conf'
+        mode: ("0644")
+# OCEKIVANI REZULTAT: "{{ app_src }}", "/etc/nginx/conf.d/app.conf", "0644".
+
+# ----------------------------------------------------------------------------
+# NIVO 05 / 25 — Handlers & Notify (`yi"`, `vi"<leader>p`, `ciw`)
+# Precice: yi"  |  vi"<leader>p  |  ciw + <C-y>
+# ZADATAK:
+#   1. Kopiraj `"Restart nginx"` iz handlera sa `yi"`.
+#   2. Pregazi oba `notify: "TODO"` sa `vi"<leader>p`.
+#   3. U handleru promeni `state: reloaded` u `state: restarted` (probaj autocomplete!).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Nginx with handlers
+  hosts: prod_web
+  tasks:
+    - name: Update main config
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: "TODO"
+    - name: Update TLS config
+      ansible.builtin.template:
+        src: tls.conf.j2
+        dest: /etc/nginx/conf.d/tls.conf
+      notify: "TODO"
+  handlers:
+    - name: "Restart nginx"
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+# OCEKIVANI REZULTAT: 2x notify: "Restart nginx", state: restarted.
+
+# ----------------------------------------------------------------------------
+# NIVO 06 / 25 — RHEL 9 Base Packages & Repo (`gcc`, `ciw`, `<leader>s`)
+# Precice: gcc  |  ciw  |  <leader>s
+# ZADATAK:
+#   1. Zakomentarisi nesigurni paket `- telnet` sa `gcc`.
+#   2. Promeni `state: absent` u `state: present`.
+#   3. Zameni sve pojave `old_repo_06` u `rhel9_baseos` pomocu `<leader>s`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 base packages
+  hosts: prod_web
+  vars:
+    primary_repo: old_repo_06
+    fallback_repo: old_repo_06
+  tasks:
+    - name: Install core tools
+      ansible.builtin.dnf:
+        enablerepo: old_repo_06
+        name:
+          - firewalld
+          - chrony
+          - telnet
+        state: absent
+# OCEKIVANI REZULTAT: # - telnet, state: present, rhel9_baseos 3x.
+
+# ============================================================================
+#  TIER 2: RHEL 9 SISTEMSKA ADMINISTRACIJA (7-12)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 07 / 25 — RHEL 9 `firewalld` & Portovi (`ct:`, `ds)`, `ciw`, `gcc`)
+# Precice: ct:  |  ds)  |  ciw  |  gcc
+# ZADATAK:
+#   1. Prebaci `firewalld:` u FQCN `ansible.posix.firewalld:` (`ct:`).
+#   2. Skini zagrade oko `port: ("443/tcp")` (`ds)`).
+#   3. Postavi `permanent: true`, `immediate: true` i `state: enabled`.
+#   4. Zakomentarisi `- "23/tcp"` (telnet!) sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 firewall hardening
+  hosts: prod_web
+  become: true
+  tasks:
+    - name: Allow HTTPS traffic
+      firewalld:
+        port: ("443/tcp")
+        permanent: false
+        immediate: false
+        state: disabled
+    - name: Extra ports
+      ansible.builtin.debug:
+        var: ports
+      vars:
+        ports:
+          - "443/tcp"
+          - "23/tcp"
+# OCEKIVANI REZULTAT: ansible.posix.firewalld:, "443/tcp", true/true/enabled, # - "23/tcp".
+
+# ----------------------------------------------------------------------------
+# NIVO 08 / 25 — RHEL 9 SELinux & Sysctl Tuning
+# Precice: ciw  |  cs'"  |  ci"  |  <leader>dd
+# ZADATAK:
+#   1. Prebaci SELinux u `state: enforcing` i `policy: targeted`.
+#   2. Promeni `name: 'net.ipv4.ip_forward'` u `"net.ipv4.ip_forward"` (`cs'"`).
+#   3. Promeni `value: "0"` u `"1"` i `reload: false` u `true`.
+#   4. Obrisi `selinux_bypass_08: true` sa `<leader>dd`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 SELinux and kernel tuning
+  hosts: k8s_nodes
+  become: true
+  tasks:
+    - name: Enforce SELinux
+      ansible.posix.selinux:
+        policy: minimum
+        state: disabled
+        selinux_bypass_08: true
+    - name: Enable IP forwarding
+      ansible.posix.sysctl:
+        name: 'net.ipv4.ip_forward'
+        value: "0"
+        reload: false
+# OCEKIVANI REZULTAT: targeted, enforcing, bypass obrisan, "net.ipv4.ip_forward", "1", true.
+
+# ----------------------------------------------------------------------------
+# NIVO 09 / 25 — `block / rescue / always` Error Recovery
+# Precice: V + J/K  |  ci"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Postavi `become: true`.
+#   2. Poredjaj sekcije redom: `block:` -> `rescue:` -> `always:` (`V` + `J`/`K`).
+#   3. Zakomentarisi `failed_when: false` (`gcc`).
+#   4. U `rescue:` stavi `msg: "Rollback triggered"`, a u `always:` `state: absent`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Safe DB migration with rescue
+  hosts: db_primary
+  become: false
+  tasks:
+    - always:
+        - name: Cleanup lock file
+          ansible.builtin.file:
+            path: /var/run/migrate.lock
+            state: touch
+      rescue:
+        - name: Notify rollback
+          ansible.builtin.debug:
+            msg: "TODO"
+      block:
+        - name: Run schema migration
+          ansible.builtin.command: /usr/local/bin/migrate-db
+          failed_when: false
+# OCEKIVANI REZULTAT: become true, block -> rescue -> always, # failed_when, Rollback triggered, absent.
+
+# ----------------------------------------------------------------------------
+# NIVO 10 / 25 — OpenSSH `lineinfile` Hardening
+# Precice: ci"  |  ds)  |  yi" + vi"<leader>p  |  gcc
+# ZADATAK:
+#   1. Promeni `"PermitRootLogin yes"` u `"PermitRootLogin no"` i `"PasswordAuthentication yes"` u `"PasswordAuthentication no"`.
+#   2. Skini zagrade oko `("Port 2222")` (`ds)`).
+#   3. Promeni `validate: "true"` u `"/usr/sbin/sshd -t -f %s"`.
+#   4. Kopiraj `"Restart sshd"` u `notify: "FIXME"` (`yi"` + `vi"<leader>p`), zakomentarisi `AllowEmptyPasswords` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Harden OpenSSH on RHEL 9
+  hosts: all
+  become: true
+  tasks:
+    - name: Lock down sshd_config
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        line: "{{ item }}"
+        validate: "true"
+      loop:
+        - "PermitRootLogin yes"
+        - "PasswordAuthentication yes"
+        - ("Port 2222")
+        - "AllowEmptyPasswords yes"
+      notify: "FIXME"
+  handlers:
+    - name: "Restart sshd"
+      ansible.builtin.systemd:
+        name: sshd
+        state: restarted
+# OCEKIVANI REZULTAT: PermitRootLogin no, PasswordAuthentication no, "Port 2222", # AllowEmpty, validate, notify.
+
+# ----------------------------------------------------------------------------
+# NIVO 11 / 25 — `systemd` Timer & YAML Indent (`V` + `>`)
+# Precice: ci"  |  ciw  |  gcc  |  V + >
+# ZADATAK:
+#   1. Promeni `name: "backup-db.service"` u `"backup-db.timer"`.
+#   2. Postavi `enabled: true`, `daemon_reload: true`, `state: started`.
+#   3. Otkomentarisi `masked: false` (`gcc`).
+#   4. Uvuci `enabled:`, `daemon_reload:`, `state:` i `masked:` na tacno 8 razmaka (`V` + `>`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Enable nightly backup timer
+  hosts: db_primary
+  become: true
+  tasks:
+    - name: Start backup timer
+      ansible.builtin.systemd:
+        name: "backup-db.service"
+      enabled: false
+      daemon_reload: false
+      state: stopped
+      # masked: false
+# OCEKIVANI REZULTAT: backup-db.timer, 8 razmaka za enabled/daemon_reload/state/masked.
+
+# ----------------------------------------------------------------------------
+# NIVO 12 / 25 — `loop` + `when` + `tags` Optimizacija
+# Precice: ci"  |  V + J/K  |  gcc  |  cs'"
+# ZADATAK:
+#   1. Promeni `when: ansible_os_family == "Debian"` u `"RedHat"`.
+#   2. Poredjaj pakete abecedno: `ca-certificates` -> `curl` -> `jq` -> `tmux` (`V` + `J`/`K`).
+#   3. Zakomentarisi `- "ftp"` sa `gcc`.
+#   4. Promeni `tags: ['old']` u `["rhel9", "base"]`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Install RHEL 9 CLI tools
+  hosts: all
+  become: true
+  tasks:
+    - name: Install base packages
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      when: ansible_os_family == "Debian"
+      tags: ['old']
+      loop:
+        - "tmux"
+        - "ca-certificates"
+        - "jq"
+        - "curl"
+        - "ftp"
+# OCEKIVANI REZULTAT: "RedHat", ["rhel9", "base"], ca-certificates -> curl -> jq -> tmux, # - "ftp".
+
+# ============================================================================
+#  TIER 3: ANSIBLE NAPREDNO — URI, Podman, HAProxy, Users, Cron, Git (13-20)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 13 / 25 — `uri` Healthcheck + Retries
+# Precice: ci"  |  ds)  |  <leader>+  |  ciw  |  gcc
+# ZADATAK:
+#   1. Promeni `url: "http://localhost/health"` u `"https://api.prod.internal/health"`.
+#   2. Skini zagrade oko `status_code: (200)` (`ds)`).
+#   3. Povecaj `retries: 1` u `10` (`9<leader>+`) i `delay: 1` u `5` (`4<leader>+`).
+#   4. Postavi `validate_certs: true` i zakomentarisi `ignore_tls_hack: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Wait for API health endpoint
+  hosts: prod_web
+  tasks:
+    - name: Poll health endpoint
+      ansible.builtin.uri:
+        url: "http://localhost/health"
+        status_code: (200)
+        validate_certs: false
+        ignore_tls_hack: true
+      retries: 1
+      delay: 1
+# OCEKIVANI REZULTAT: https prod url, 200, validate_certs true, # ignore_tls_hack, retries 10, delay 5.
+
+# ----------------------------------------------------------------------------
+# NIVO 14 / 25 — Rootless Podman Container na RHEL 9
+# Precice: ct:  |  ci"  |  ciw  |  cs'"  |  gcc
+# ZADATAK:
+#   1. Prebaci `docker_container:` u `containers.podman.podman_container:` (`ct:`).
+#   2. Promeni `image: "quay.io/org/agent:dev"` u `"quay.io/org/agent:v2.1"`.
+#   3. Postavi `state: started` i `restart_policy: "always"`.
+#   4. Promeni `ports: ['9090:9090']` u `["8080:8080"]` i zakomentarisi `privileged: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Run rootless monitoring agent on RHEL 9
+  hosts: edge_nodes
+  tasks:
+    - name: Start agent container
+      docker_container:
+        name: sre-agent
+        image: "quay.io/org/agent:dev"
+        state: stopped
+        restart_policy: 'no'
+        privileged: true
+        ports: ['9090:9090']
+# OCEKIVANI REZULTAT: podman_container, v2.1, started, "always", ["8080:8080"], # privileged.
+
+# ----------------------------------------------------------------------------
+# NIVO 15 / 25 — HAProxy + Keepalived VIP Failover
+# Precice: <leader>s  |  <leader>+  |  ci"  |  gcc  |  V + K
+# ZADATAK:
+#   1. Zameni sve pojave `old_vip_15` u `10.50.0.10` sa `<leader>s`.
+#   2. Postavi `priority: 150`, `vrrp_state: "MASTER"` i `check_interval: 2`.
+#   3. Zakomentarisi `nopreempt_bug: true` (`gcc`).
+#   4. Pomeri `Configure haproxy` IZNAD `Configure keepalived` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: HA LoadBalancer pair
+  hosts: lb_nodes
+  vars:
+    vip_address: "old_vip_15"
+    health_bind: "old_vip_15:8404"
+    priority: 100
+    vrrp_state: "BACKUP"
+    check_interval: 10
+    nopreempt_bug: true
+  tasks:
+    - name: Configure keepalived
+      ansible.builtin.template:
+        src: keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+    - name: Configure haproxy
+      ansible.builtin.template:
+        src: haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+# OCEKIVANI REZULTAT: 10.50.0.10, 150, MASTER, 2, # nopreempt_bug, haproxy pre keepalived.
+
+# ----------------------------------------------------------------------------
+# NIVO 16 / 25 — SRE User & SSH Key Onboarding
+# Precice: ci"  |  ciw  |  cs'"  |  gcc
+# ZADATAK:
+#   1. Promeni `name: "temp_user"` u `"sre_admin"` i `groups: 'users'` u `"wheel"`.
+#   2. Promeni `shell: "/sbin/nologin"` u `"/bin/bash"` i `state: absent` u `present`.
+#   3. Postavi `exclusive: true` za `authorized_key`.
+#   4. Zakomentarisi `password: "123456"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Onboard SRE admin user
+  hosts: all
+  become: true
+  tasks:
+    - name: Create SRE user
+      ansible.builtin.user:
+        name: "temp_user"
+        groups: 'users'
+        shell: "/sbin/nologin"
+        password: "123456"
+        state: absent
+    - name: Install SSH public key
+      ansible.posix.authorized_key:
+        user: sre_admin
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+        exclusive: false
+# OCEKIVANI REZULTAT: "sre_admin", "wheel", "/bin/bash", present, exclusive true, # password.
+
+# ----------------------------------------------------------------------------
+# NIVO 17 / 25 — Ansible Cron Job & Cleanup
+# Precice: ci"  |  ds)  |  ciw  |  gcc
+# ZADATAK:
+#   1. Postavi `minute: "30"` i `hour: "3"` (03:30 ujutru).
+#   2. Skini zagrade oko `user: ("root")` (`ds)`) i stavi `state: present`.
+#   3. Promeni `job: "echo test"` u `"/usr/local/bin/cleanup.sh"`.
+#   4. Zakomentarisi `disabled: true` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Schedule nightly disk cleanup
+  hosts: all
+  become: true
+  tasks:
+    - name: Add cleanup cron
+      ansible.builtin.cron:
+        name: "Nightly disk cleanup"
+        minute: "*"
+        hour: "*"
+        user: ("root")
+        job: "echo test"
+        disabled: true
+        state: absent
+# OCEKIVANI REZULTAT: "30", "3", "root", "/usr/local/bin/cleanup.sh", # disabled, present.
+
+# ----------------------------------------------------------------------------
+# NIVO 18 / 25 — Template Config sa Backup & Validate
+# Precice: ci"  |  ciw  |  cs'"  |  <leader>dd
+# ZADATAK:
+#   1. Postavi `owner: "nginx"`, `group: "nginx"` i `mode: "0640"`.
+#   2. Upali `backup: true` i promeni `validate: "true"` u `"nginx -t -c %s"`.
+#   3. Obrisi `temp_copy_18: "junk"` sa `<leader>dd`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Safe nginx config deployment
+  hosts: prod_web
+  become: true
+  tasks:
+    - name: Deploy validated nginx.conf
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: 'root'
+        group: 'root'
+        mode: '0777'
+        backup: false
+        validate: "true"
+        temp_copy_18: "junk"
+# OCEKIVANI REZULTAT: nginx/nginx/0640, backup true, nginx -t -c %s, temp_copy obrisan.
+
+# ----------------------------------------------------------------------------
+# NIVO 19 / 25 — Git Deploy & `changed_when`
+# Precice: ci"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Promeni `version: "main"` u `"v3.5.0"`.
+#   2. Postavi `force: false` i `update: true`.
+#   3. Postavi `changed_when: git_result.changed` i zakomentarisi `accept_hostkey: false` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Deploy release tag from Git
+  hosts: app_servers
+  tasks:
+    - name: Checkout release tag
+      ansible.builtin.git:
+        repo: "git@github.com:org/service.git"
+        dest: /opt/service
+        version: "main"
+        force: true
+        update: false
+        accept_hostkey: false
+      register: git_result
+      changed_when: true
+# OCEKIVANI REZULTAT: "v3.5.0", force false, update true, # accept_hostkey, changed_when: git_result.changed.
+
+# ----------------------------------------------------------------------------
+# NIVO 20 / 25 — RHEL 9 Security Patching & Controlled Reboot
+# Precice: ciw  |  <leader>+  |  gcc
+# ZADATAK:
+#   1. Upali `security: true`, `bugfix: true` i `state: latest`.
+#   2. Postavi `reboot_timeout: 600` i `pre_reboot_delay: 15`.
+#   3. Zakomentarisi `force_reboot_20: true` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: RHEL 9 security patching
+  hosts: rhel9_fleet
+  become: true
+  tasks:
+    - name: Apply security updates only
+      ansible.builtin.dnf:
+        name: "*"
+        security: false
+        bugfix: false
+        state: present
+    - name: Reboot if kernel updated
+      ansible.builtin.reboot:
+        reboot_timeout: 60
+        pre_reboot_delay: 0
+        force_reboot_20: true
+# OCEKIVANI REZULTAT: security/bugfix true, latest, 600, 15, # force_reboot_20.
+
+# ============================================================================
+#  TIER 4: INCIDENTI & GRAND MASTER ANSIBLE BOSSOVI (21-25)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 21 / 25 — INCIDENT: Playbook Bez Zastite na Produkciji
+# Precice: <leader>+  |  ciw  |  gcc  |  yi" + vi"<leader>p  |  V + K
+# ZADATAK:
+#   1. Postavi `serial: 2`, `max_fail_percentage: 10`, `any_errors_fatal: true`.
+#   2. Zakomentarisi `force_reboot_all: true` (`gcc`).
+#   3. Kopiraj `"Verify cluster quorum"` (`yi"`) i pregazi oba `"TODO_CHECK"` sa `vi"<leader>p`.
+#   4. Pomeri `Backup etcd` IZNAD `Upgrade kubeadm` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Safe K8s control-plane upgrade
+  hosts: k8s_masters
+  serial: 100
+  max_fail_percentage: 99
+  any_errors_fatal: false
+  force_reboot_all: true
+  vars:
+    quorum_label: "Verify cluster quorum"
+  pre_tasks:
+    - name: "TODO_CHECK"
+      ansible.builtin.command: /usr/local/bin/check-quorum
+  tasks:
+    - name: Upgrade kubeadm
+      ansible.builtin.dnf:
+        name: kubeadm
+        state: latest
+    - name: Backup etcd
+      ansible.builtin.command: /usr/local/bin/etcd-snap
+  post_tasks:
+    - name: "TODO_CHECK"
+      ansible.builtin.command: /usr/local/bin/check-quorum
+# OCEKIVANI REZULTAT: serial 2, max_fail 10, any_errors_fatal true, # force_reboot, 2x quorum, Backup pre Upgrade.
+
+# ----------------------------------------------------------------------------
+# NIVO 22 / 25 — INCIDENT: Secrets Leak u Ansible Logovima (`no_log`)
+# Precice: <leader>s  |  ciw  |  cs'"  |  gcc
+# ZADATAK:
+#   1. Zameni sve pojave `vault_old_22` u `vault_prod` sa `<leader>s`.
+#   2. Upali `gather_facts: true` i `no_log: true` (spreci curenje tajni u stdout!).
+#   3. Promeni `mode: '0644'` u `"0600"`.
+#   4. Zakomentarisi `debug_print_secret: true` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Deploy vaulted DB password safely
+  hosts: db_nodes
+  gather_facts: false
+  vars:
+    vault_path: "secrets/vault_old_22/db.yml"
+    vault_id: "vault_old_22"
+  tasks:
+    - name: Write DB credentials file
+      ansible.builtin.template:
+        src: db.env.j2
+        dest: /etc/app/db.env
+        mode: '0644'
+      no_log: false
+      debug_print_secret: true
+# OCEKIVANI REZULTAT: vault_prod 2x, gather_facts true, no_log true, "0600", # debug_print_secret.
+
+# ----------------------------------------------------------------------------
+# NIVO 23 / 25 — BOSS 1: Zero-Downtime Rolling Deploy
+# Kombinuj: ciw, V+J/K, yi"+vi"<leader>p, gcc
+# ZADATAK:
+#   1. Promeni `serial: 10` u `1` i `become: false` u `true`.
+#   2. Zakomentarisi `ignore_errors: true` (`gcc`).
+#   3. Poredjaj 3 taska redom: `Drain node` -> `Upgrade app` -> `Enable node` (`V` + `J`/`K`).
+#   4. Kopiraj `"Reload haproxy"` iz handlera i ubaci u `notify: "FIXME"` (`yi"` + `vi"<leader>p`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Rolling deploy
+  hosts: prod_web
+  serial: 10
+  become: false
+  ignore_errors: true
+  tasks:
+    - name: Enable node
+      ansible.builtin.command: /usr/local/bin/node-enable
+    - name: Drain node
+      ansible.builtin.command: /usr/local/bin/node-drain
+    - name: Upgrade app
+      ansible.builtin.dnf:
+        name: payments-api
+        state: latest
+      notify: "FIXME"
+  handlers:
+    - name: "Reload haproxy"
+      ansible.builtin.systemd:
+        name: haproxy
+        state: reloaded
+# OCEKIVANI REZULTAT: serial 1, become true, # ignore_errors, Drain -> Upgrade -> Enable, notify Reload haproxy.
+
+# ----------------------------------------------------------------------------
+# NIVO 24 / 25 — BOSS 2: Complete RHEL 9 Web+DB Role Playbook
+# Kombinuj: ciw, ct:, <leader>+, V+J/K, yi"+vi"<leader>p, gcc, <leader>dd
+# ZADATAK:
+#   1. Postavi `hosts: rhel9_prod`, `become: true`, `serial: 1` i `selinux_state: enforcing`.
+#   2. Prebaci `yum:` -> `ansible.builtin.dnf:` i `service:` -> `ansible.builtin.systemd:` (`ct:`).
+#   3. Obrisi `legacy_hack_24: "remove"` (`<leader>dd`) i zakomentarisi `disable_firewall: true` (`gcc`).
+#   4. Kopiraj `"Reload nginx"` i pregazi oba `notify: "TODO"` (`yi"` + `vi"<leader>p`).
+#   5. Poredjaj 4 faze u `phases:` od 1 do 4 (`V` + `J`/`K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Full RHEL 9 Web+DB provisioning
+  hosts: rhel9_dev
+  become: false
+  serial: 5
+  vars:
+    selinux_state: permissive
+    disable_firewall: true
+    legacy_hack_24: "remove"
+    phases:
+      - "3. Config"
+      - "1. Firewall"
+      - "4. Start"
+      - "2. Packages"
+  tasks:
+    - name: Install packages
+      yum:
+        name: nginx
+        state: present
+      notify: "TODO"
+    - name: Ensure service started
+      service:
+        name: nginx
+        state: started
+      notify: "TODO"
+  handlers:
+    - name: "Reload nginx"
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+# OCEKIVANI REZULTAT: rhel9_prod, become true, serial 1, enforcing, dnf+systemd, legacy obrisan, # disable_firewall, 2x notify, phases 1..4.
+
+# ----------------------------------------------------------------------------
+# NIVO 25 / 25 — FINAL ANSIBLE BOSS: Full RHEL 9 Production Cutover!
+# Kombinuj SVE: <leader>dd, <leader>s, <leader>+, cs'", ds), gcc, V+J/K, yi"+vi"<leader>p
+# ZADATAK:
+#   1. Obrisi `cutover_trash_25: "DELETE_ME"` u void registar (`<leader>dd`).
+#   2. Zameni sve pojave `rc_alpha_25` u `prod_v5` sa `<leader>s` (4 pojave!).
+#   3. Postavi `serial: 1` i povecaj `retries: 1` -> `5` (`4<leader>+`).
+#   4. Sredi surround: `'eu-central-1'` -> `"eu-central-1"`, `("0600")` -> `"0600"`, `(8443)` -> `8443`.
+#   5. Upali `become: true` i `no_log: true`; zakomentarisi `chaos_mode: true` (`gcc`).
+#   6. Poredjaj 4 cutover faze u `cutover_plan:` od 1 do 4 (`V` + `J`/`K`).
+#   7. Kopiraj `"Notify SRE Slack"` (`yi"`) i pregazi oba `notify: "FIXME"` sa `vi"<leader>p`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+- name: Production cutover rc_alpha_25
+  hosts: rc_alpha_25
+  become: false
+  serial: 5
+  vars:
+    region: 'eu-central-1'
+    release_tag: "rc_alpha_25"
+    config_mode: ("0600")
+    listen_port: (8443)
+    chaos_mode: true
+    cutover_trash_25: "DELETE_ME"
+    cutover_plan:
+      - "4. Full cutover"
+      - "2. DB migration"
+      - "1. Preflight check"
+      - "3. Canary rollout"
+  tasks:
+    - name: Rollout rc_alpha_25 artifact
+      ansible.builtin.dnf:
+        name: "platform-rc_alpha_25"
+        state: present
+      no_log: false
+      retries: 1
+      notify: "FIXME"
+    - name: Verify cutover health
+      ansible.builtin.uri:
+        url: "https://localhost:8443/health"
+      notify: "FIXME"
+  handlers:
+    - name: "Notify SRE Slack"
+      ansible.builtin.debug:
+        msg: "Cutover complete"
+# OCEKIVANI REZULTAT:
+#   trash obrisan, prod_v5 4x, serial 1, retries 5, surround cist, become+no_log true,
+#   # chaos_mode, cutover_plan 1..4, 2x notify "Notify SRE Slack".

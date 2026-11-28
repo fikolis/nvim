@@ -1,0 +1,759 @@
+# ============================================================================
+#  NEOVIM KUBERNETES & OPENSHIFT DOJO — 25 NIVOA (PRAVI K8S LSP AUTOCOMPLETE!)
+# ============================================================================
+#  Zasto u `learning/k8s/`?
+#    Tvoj config automatski prepoznaje `**/k8s/*.yaml` kao `yaml.kubernetes`
+#    i pali `yamlls` sa punom Kubernetes semom — pa rade pravi autocomplete
+#    (`IfNotPresent`, `Forbid`, `OnFailure`, `ClusterFirst`...), `K` hover i
+#    validacija!
+#
+#  Komande:
+#    - `:DojoGames`         = menjaj igru (Lua Core 33 | K8s 25 | Ansible 25)
+#    - `:Dojo` / `:DojoNext`= status svih nivoa / skok na sledeci nedovrsen
+#    - `:DojoNew [ime]`     = New Game (novi igrac ili reset)
+#    - `:DojoSave` (ili `:w`) / `:DojoLoad` = Save / Load Game za vise igraca
+#    - `:DojoResetLevel [N]`= vrati samo trenutni/zadati nivo na pocetak
+#    - `<broj><Space>+` / `<broj><Space>-` = povecaj/smanji broj (tmux-safe!)
+# ============================================================================
+
+---
+# ============================================================================
+#  TIER 1: K8S OSNOVE — Brojevi, Paste, Komentari, Redosled, Zamena (1-5)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 01 / 25 — Deployment Scale & Image Bump (Probaj K8s LSP autocomplete!)
+# Precice: 2<leader>+  |  f5r7  |  ciw + <C-n>/<C-y>
+# ZADATAK:
+#   1. Na `replicas: 1` pritisni `2<leader>+` -> `3`.
+#   2. Na `image: "nginx:1.25"` promeni tag u `nginx:1.27` (`f5r7` ili `f2` pa `2<leader>+`).
+#   3. Na `imagePullPolicy: Always` uradi `ciw`, kucaj `IfNot` i potvrdi iz K8s autocomplete-a (`<C-y>`) -> `IfNotPresent`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-frontend
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: nginx
+          image: "nginx:1.25"
+          imagePullPolicy: Always
+# OCEKIVANI REZULTAT:
+#   replicas: 3, image: "nginx:1.27", imagePullPolicy: IfNotPresent
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 02 / 25 — ConfigMap Env Vars: Paste bez gubitka yanka
+# Precice: yi"  |  vi"<leader>p
+# ZADATAK:
+#   1. Kopiraj `"production"` iz `CLUSTER_ENV` sa `yi"`.
+#   2. Pregazi `"dev"`, `"staging"` i `"local"` sa `vi"<leader>p` bez ponovnog kopiranja!
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-defaults
+data:
+  CLUSTER_ENV: "production"
+  APP_ENV: "dev"
+  LOG_ENV: "staging"
+  METRICS_ENV: "local"
+# OCEKIVANI REZULTAT: APP_ENV, LOG_ENV, METRICS_ENV = "production"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 03 / 25 — Container Ports & ReadinessProbe (`gcc` / `V2jgc`)
+# Precice: gcc  |  V2jgc
+# ZADATAK:
+#   1. Zakomentarisi debug port `containerPort: 9999` pomocu `gcc`.
+#   2. Otkomentarisi sve 3 linije `readinessProbe` odjednom (`V2jgc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          ports:
+            - containerPort: 8080
+            - containerPort: 9999
+          # readinessProbe:
+          #   httpGet:
+          #     path: /healthz
+# OCEKIVANI REZULTAT: # - containerPort: 9999, readinessProbe otkomentarisan.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 04 / 25 — InitContainer Args Redosled (`V` + `J`/`K`)
+# Precice: V  |  J (dole)  |  K (gore)
+# ZADATAK: Poredjaj korake u `args:` od 1 do 4 pomocu `V` i `J`/`K`!
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-migrator
+spec:
+  containers:
+    - name: init
+      args:
+        - "3. seed-cache"
+        - "1. wait-for-db"
+        - "4. warm-up"
+        - "2. run-migrations"
+# OCEKIVANI REZULTAT: 1 -> 2 -> 3 -> 4
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 05 / 25 — Service Namespace Zamena svuda (`<leader>s`)
+# Precice: <leader>s
+# ZADATAK: Stani na `legacy_ns_05`, pritisni `<leader>s`, ukucaj `prod_payments` + `<Enter>`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-svc
+  namespace: legacy_ns_05
+  labels:
+    owner-ns: legacy_ns_05
+spec:
+  externalName: db.legacy_ns_05.svc.cluster.local
+  selector:
+    ns: legacy_ns_05
+# OCEKIVANI REZULTAT: Sve 4 pojave su `prod_payments`.
+
+---
+# ============================================================================
+#  TIER 2: K8S SURROUND, VOID DELETE, INDENT, SECURITY & NETPOL (6-11)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 06 / 25 — ConfigMap Surround (`ysiw"`, `cs'"`, `ds)`)
+# Precice: ysiw"  |  cs'"  |  ds)
+# ZADATAK:
+#   1. Stavi `eu_central` u duple navodnike (`ysiw"`) -> `"eu_central"`.
+#   2. Promeni `'8080'` u `"8080"` sa `cs'"`.
+#   3. Skini zagrade oko `("30s")` sa `ds)` -> `"30s"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-settings
+data:
+  REGION: eu_central
+  PORT: '8080'
+  TIMEOUT: ("30s")
+# OCEKIVANI REZULTAT: "eu_central", "8080", "30s"
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 07 / 25 — Resources Void Delete (`yi"`, `<leader>dd`, `vi"<leader>p`)
+# Precice: yi"  |  <leader>dd  |  vi"<leader>p
+# ZADATAK:
+#   1. Kopiraj `"512Mi"` iz `requests.memory` sa `yi"`.
+#   2. Obrisi `ephemeral-storage: "OBRISI_ME"` u void registar (`<leader>dd`).
+#   3. Zameni `"FIXME"` u `limits.memory` sa `vi"<leader>p`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: worker-07
+spec:
+  containers:
+    - name: worker
+      resources:
+        requests:
+          memory: "512Mi"
+        ephemeral-storage: "OBRISI_ME"
+        limits:
+          memory: "FIXME"
+# OCEKIVANI REZULTAT: ephemeral-storage obrisana, limits.memory: "512Mi".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 08 / 25 — YAML Indent Popravka (`V` + `>` / `<`)
+# Precice: V  |  > (uvuci 2 razmaka)  |  < (izvuci)
+# ZADATAK:
+#   1. Uvuci `requests:` na tacno 4 razmaka (ispod `resources:`).
+#   2. Uvuci `cpu: "250m"` i `memory: "256Mi"` na tacno 6 razmaka.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: indent-fix
+spec:
+  resources:
+requests:
+  cpu: "250m"
+  memory: "256Mi"
+# OCEKIVANI REZULTAT: requests (4 sp), cpu & memory (6 sp).
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 09 / 25 — SecurityContext Hardening (`ciw`, `gcc`)
+# Precice: ciw  |  gcc
+# ZADATAK:
+#   1. Promeni `runAsNonRoot: false` u `true`.
+#   2. Promeni `readOnlyRootFilesystem: false` u `true`.
+#   3. Promeni `allowPrivilegeEscalation: true` u `false`.
+#   4. Zakomentarisi `privileged: true` pomocu `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-pod
+spec:
+  containers:
+    - name: app
+      image: "nginx:1.27"
+      securityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+        allowPrivilegeEscalation: true
+        privileged: true
+# OCEKIVANI REZULTAT: true, true, false, # privileged: true
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 10 / 25 — HPA & Annotations (`cs'"`, `ci"`, `<leader>+`, `gcc`)
+# Precice: cs'"  |  ci"  |  <leader>+  |  gcc
+# ZADATAK:
+#   1. Promeni `host: 'old.example.com'` u `"api.prod.internal"`.
+#   2. Povecaj `minReplicas: 1` u `2` i `maxReplicas: 3` u `10` (`<leader>+`).
+#   3. Zakomentarisi `beta_debug: "true"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+  annotations:
+    host: 'old.example.com'
+    beta_debug: "true"
+spec:
+  minReplicas: 1
+  maxReplicas: 3
+# OCEKIVANI REZULTAT: host "api.prod.internal", # beta_debug, min 2, max 10.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 11 / 25 — NetworkPolicy Lockdown (`gcc`, `ds)`, `cs'"`)
+# Precice: gcc  |  ds)  |  cs'"
+# ZADATAK:
+#   1. Otkomentarisi `- Egress` pomocu `gcc`.
+#   2. Skini zagrade oko `(5432)` sa `ds)` -> `5432`.
+#   3. Promeni `protocol: 'TCP'` u `"TCP"` sa `cs'"`.
+#   4. Promeni `role: 'frontend'` u `"backend"`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-allow-backend
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+    # - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: 'frontend'
+      ports:
+        - protocol: 'TCP'
+          port: (5432)
+# OCEKIVANI REZULTAT: - Egress, role "backend", protocol "TCP", port 5432.
+
+---
+# ============================================================================
+#  TIER 3: K8S & OPENSHIFT PRODUKCIJA — StatefulSet, CronJob, PDB, RBAC (12-16)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 12 / 25 — StatefulSet: Postgres HA Klaster
+# Precice: 2<leader>+  |  ci"  |  ds)  |  gcc
+# ZADATAK:
+#   1. Povecaj `replicas: 1` u `3` (`2<leader>+`) i `serviceName: "pg-dev"` u `"postgres-headless"`.
+#   2. Promeni image u `"postgres:16.4-alpine"`.
+#   3. Skini zagrade oko `("50Gi")` (`ds)`) i promeni `storageClassName: "hdd"` u `"fast-ssd"`.
+#   4. Zakomentarisi `PG_DEBUG_SQL: "true"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-ha
+spec:
+  serviceName: "pg-dev"
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: postgres
+          image: "postgres:14.0"
+          env:
+            - name: PG_DEBUG_SQL
+              value: "true"
+              # PG_DEBUG_SQL_MARKER
+            - name: PG_DEBUG_SQL_FLAG
+              PG_DEBUG_SQL: "true"
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        storageClassName: "hdd"
+        resources:
+          requests:
+            storage: ("50Gi")
+# OCEKIVANI REZULTAT: replicas 3, postgres-headless, 16.4-alpine, fast-ssd, "50Gi", # PG_DEBUG_SQL.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 13 / 25 — CronJob: Nightly Backup Incident (Probaj K8s autocomplete!)
+# Precice: ci"  |  ciw + <C-y>  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Hitno promeni `schedule: "* * * * *"` u `"0 2 * * *"`.
+#   2. Promeni `concurrencyPolicy: Allow` u `Forbid` (probaj autocomplete!) i `successfulJobsHistoryLimit: 100` u `3`.
+#   3. Promeni `restartPolicy: Always` u `OnFailure` (probaj autocomplete!).
+#   4. Obrisi `debug_sleep_13: "9999"` (`<leader>dd`) i zakomentarisi `- "--dry-run"` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-pg-backup
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Allow
+  successfulJobsHistoryLimit: 100
+  debug_sleep_13: "9999"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Always
+          containers:
+            - name: pg-dump
+              image: "postgres:16.4-alpine"
+              args:
+                - "--format=custom"
+                - "--dry-run"
+# OCEKIVANI REZULTAT: "0 2 * * *", Forbid, 3, OnFailure, debug_sleep obrisana, # - "--dry-run".
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 14 / 25 — PodDisruptionBudget & TopologySpread
+# Precice: <leader>+  |  cs'"  |  ciw  |  V + K
+# ZADATAK:
+#   1. Povecaj `minAvailable: 0` u `2` (`2<leader>+`) i `maxSkew: 5` u `1`.
+#   2. Promeni `topologyKey: 'kubernetes.io/hostname'` u `"topology.kubernetes.io/zone"`.
+#   3. Promeni `whenUnsatisfiable: ScheduleAnyway` u `DoNotSchedule`.
+#   4. Pomeri `app: checkout` na PRVO mesto ispod `matchLabels:` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: checkout-pdb
+spec:
+  minAvailable: 0
+  maxSkew: 5
+  topologyKey: 'kubernetes.io/hostname'
+  whenUnsatisfiable: ScheduleAnyway
+  selector:
+    matchLabels:
+      tier: frontend
+      app: checkout
+# OCEKIVANI REZULTAT: minAvailable 2, maxSkew 1, zone, DoNotSchedule, app prvi.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 15 / 25 — RBAC Least-Privilege Audit
+# Precice: gcc  |  <leader>dd  |  cs'"  |  ciw
+# ZADATAK:
+#   1. Zakomentarisi `- "secrets"` i `- "delete"` (`gcc`).
+#   2. Obrisi `wildcard_hack_15: "*"` (`<leader>dd`).
+#   3. Promeni `'pods'` -> `"pods"` i `'configmaps'` -> `"configmaps"` (`cs'"`).
+#   4. Promeni `roleRef.name: cluster-admin` u `readonly-ops`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ops-viewer
+rules:
+  - apiGroups: [""]
+    wildcard_hack_15: "*"
+    resources:
+      - 'pods'
+      - 'configmaps'
+      - "secrets"
+    verbs:
+      - "get"
+      - "list"
+      - "delete"
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+# OCEKIVANI REZULTAT: # secrets, # delete, wildcard obrisana, "pods", "configmaps", readonly-ops.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 16 / 25 — OpenShift Route & TLS Edge Termination
+# Precice: ci"  |  ciw  |  ds)  |  <leader>+  |  gcc
+# ZADATAK:
+#   1. Promeni `host: "portal.apps.dev.local"` u `"portal.apps.ocp-prod.internal"`.
+#   2. Promeni `termination: passthrough` u `edge` i `insecureEdgeTerminationPolicy: Allow` u `Redirect`.
+#   3. Skini zagrade oko `targetPort: (8443)` (`ds)`) i stavi `weight: 100`.
+#   4. Zakomentarisi `haproxy_debug: "on"` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: customer-portal
+  annotations:
+    haproxy_debug: "on"
+spec:
+  host: "portal.apps.dev.local"
+  to:
+    kind: Service
+    name: portal-svc
+    weight: 50
+  port:
+    targetPort: (8443)
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Allow
+# OCEKIVANI REZULTAT: ocp-prod host, weight 100, targetPort 8443, edge, Redirect, # haproxy_debug.
+
+---
+# ============================================================================
+#  TIER 4: GITOPS, SECRETS, ALERTS, DAEMONSET & INCIDENTI (17-23)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 17 / 25 — ArgoCD Application: Auto-Sync & Self-Heal
+# Precice: <leader>s  |  ci"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Zameni sve pojave `dev_cluster_17` u `ocp_prod` sa `<leader>s`.
+#   2. Promeni `targetRevision: "HEAD"` u `"v3.2.0"`.
+#   3. Upali `prune: true` i `selfHeal: true`.
+#   4. Otkomentarisi `- CreateNamespace=true` i zakomentarisi `skipDryRun: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: billing-dev_cluster_17
+spec:
+  project: dev_cluster_17
+  source:
+    repoURL: "https://git.internal/gitops/dev_cluster_17.git"
+    targetRevision: "HEAD"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    skipDryRun: true
+    syncOptions:
+      # - CreateNamespace=true
+# OCEKIVANI REZULTAT: ocp_prod svuda, v3.2.0, prune/selfHeal true, CreateNamespace, # skipDryRun.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 18 / 25 — ExternalSecrets & Vault Integracija
+# Precice: <leader>s  |  ds)  |  ciw  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Zameni sve pojave `vault_staging_18` u `vault_prod` sa `<leader>s`.
+#   2. Skini zagrade oko `refreshInterval: ("15m")` (`ds)`).
+#   3. Promeni `creationPolicy: Orphan` u `Owner`.
+#   4. Obrisi `plaintext_leak_18: "hunter2"` (`<leader>dd`) i zakomentarisi `allowInsecureTLS: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: db-creds-vault_staging_18
+spec:
+  refreshInterval: ("15m")
+  secretStoreRef:
+    name: vault_staging_18
+    kind: ClusterSecretStore
+  allowInsecureTLS: true
+  plaintext_leak_18: "hunter2"
+  target:
+    name: db-credentials
+    creationPolicy: Orphan
+  dataFrom:
+    - extract:
+        key: "secret/data/vault_staging_18/db"
+# OCEKIVANI REZULTAT: vault_prod svuda, "15m", Owner, leak obrisan, # allowInsecureTLS.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 19 / 25 — Prometheus AlertRule: 3 AM PagerDuty Spas
+# Precice: V + K  |  ci"  |  gcc
+# ZADATAK:
+#   1. Pomeri `alert: HighPodRestarts` na PRVO mesto ispod `rules:` (`V` + `K`).
+#   2. Promeni `for: "1s"` u `"5m"`.
+#   3. Promeni `severity: "info"` u `"critical"` i `team: "unknown"` u `"sre-platform"`.
+#   4. Promeni `runbook: "TODO"` u `"https://wiki.internal/oom"` i zakomentarisi `mute_all_alerts: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-alerts
+spec:
+  rules:
+    for: "1s"
+    alert: HighPodRestarts
+    mute_all_alerts: true
+    labels:
+      severity: "info"
+      team: "unknown"
+    annotations:
+      runbook: "TODO"
+# OCEKIVANI REZULTAT: alert prvi, "5m", # mute_all_alerts, critical, sre-platform, runbook URL.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 20 / 25 — DaemonSet: Node Log Collector
+# Precice: ci"  |  cs'"  |  ciw  |  gcc
+# ZADATAK:
+#   1. Promeni image u `"fluent/fluent-bit:3.1"`.
+#   2. Promeni `path: '/tmp/logs'` u `"/var/log/containers"` i `readOnly: false` u `true`.
+#   3. Promeni `operator: 'Equal'` u `"Exists"` i `effect: 'PreferNoSchedule'` u `"NoSchedule"`.
+#   4. Zakomentarisi `drop_all_logs: true` sa `gcc`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit
+spec:
+  template:
+    spec:
+      tolerations:
+        - operator: 'Equal'
+          effect: 'PreferNoSchedule'
+      containers:
+        - name: fluent-bit
+          image: "fluent/fluent-bit:1.9"
+          drop_all_logs: true
+          volumeMounts:
+            - name: varlog
+              readOnly: false
+      volumes:
+        - name: varlog
+          hostPath:
+            path: '/tmp/logs'
+# OCEKIVANI REZULTAT: fluent-bit:3.1, /var/log/containers, readOnly true, Exists, NoSchedule, # drop_all_logs.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 21 / 25 — INCIDENT: CrashLoopBackOff (OOMKilled + Los Probe!)
+# Precice: ci"  |  <leader>+  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Podigni resurse: `memory: "32Mi"` -> `"1Gi"` i `cpu: "50m"` -> `"500m"`.
+#   2. Sredi livenessProbe: `initialDelaySeconds: 1` -> `30`, `periodSeconds: 1` -> `10`, `failureThreshold: 1` -> `5`.
+#   3. Obrisi `memory_leak_sim_21: "yes"` (`<leader>dd`).
+#   4. Zakomentarisi `CRASH_ON_START: "1"` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: orders
+          image: "quay.io/org/orders:v2"
+          memory_leak_sim_21: "yes"
+          env:
+            - name: CRASH_ON_START
+              CRASH_ON_START: "1"
+          resources:
+            limits:
+              memory: "32Mi"
+              cpu: "50m"
+          livenessProbe:
+            initialDelaySeconds: 1
+            periodSeconds: 1
+            failureThreshold: 1
+# OCEKIVANI REZULTAT: 1Gi, 500m, 30/10/5, memory_leak obrisana, # CRASH_ON_START.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 22 / 25 — INCIDENT: CoreDNS Split-Brain & Loop (Probaj dnsPolicy autocomplete!)
+# Precice: <leader>s  |  ds)  |  ciw + <C-y>  |  <leader>+  |  gcc  |  V + K
+# ZADATAK:
+#   1. Zameni sve pojave `broken_dns_22` u `10.96.0.10` sa `<leader>s`.
+#   2. Skini zagrade oko `ndots: (2)` (`ds)`) i promeni `dnsPolicy: Default` u `ClusterFirst`.
+#   3. Povecaj `replicas: 1` u `3` (`2<leader>+`) i zakomentarisi `loop_forward: "127.0.0.1"` (`gcc`).
+#   4. Pomeri `upstream_1: "1.1.1.1"` IZNAD `upstream_2: "8.8.8.8"` (`V` + `K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+spec:
+  replicas: 1
+  template:
+    spec:
+      dnsPolicy: Default
+      clusterIP: "broken_dns_22"
+      fallbackIP: "broken_dns_22"
+      ndots: (2)
+      loop_forward: "127.0.0.1"
+      upstreams:
+        upstream_2: "8.8.8.8"
+        upstream_1: "1.1.1.1"
+# OCEKIVANI REZULTAT: 10.96.0.10, replicas 3, ClusterFirst, ndots 2, # loop_forward, upstream_1 prvi.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 23 / 25 — INCIDENT: Istekao TLS Sertifikat (cert-manager)
+# Precice: ci"  |  cs'"  |  <leader>dd  |  gcc
+# ZADATAK:
+#   1. Prebaci `issuerRef.name: 'letsencrypt-staging'` u `"letsencrypt-prod"`.
+#   2. Postavi `duration: "2160h"` i `renewBefore: "360h"`.
+#   3. Promeni `dnsName: "shop.dev.local"` u `"shop.prod.example.com"`.
+#   4. Obrisi `expired_override_23: true` (`<leader>dd`) i zakomentarisi `selfSigned: true` (`gcc`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: shop-tls
+spec:
+  secretName: shop-tls-secret
+  duration: "24h"
+  renewBefore: "1h"
+  expired_override_23: true
+  selfSigned: true
+  dnsName: "shop.dev.local"
+  issuerRef:
+    kind: ClusterIssuer
+    name: 'letsencrypt-staging'
+# OCEKIVANI REZULTAT: letsencrypt-prod, 2160h, 360h, shop.prod.example.com, override obrisan, # selfSigned.
+
+---
+# ============================================================================
+#  TIER 5: K8S BOSS GAUNTLETS (24-25)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# NIVO 24 / 25 — BOSS 1: Multi-Container Envoy Sidecar Mesh Deployment
+# Kombinuj: <leader>s, <leader>+, ci", ciw, ds), gcc, <leader>dd, V+J/K
+# ZADATAK:
+#   1. Zameni sve pojave `beta_mesh_24` u `prod_mesh` (`<leader>s`).
+#   2. Povecaj `replicas: 1` u `4` (`3<leader>+`) i postavi `runAsNonRoot: true`.
+#   3. Promeni envoy image u `"envoyproxy/envoy:v1.31"` i skini zagrade sa `containerPort: (15001)` (`ds)`).
+#   4. Zakomentarisi `ENVOY_LOG_LEVEL: "trace"` (`gcc`) i obrisi `sidecar_junk_24: "bye"` (`<leader>dd`).
+#   5. Poredjaj `containers_order` redom: `init-config` -> `app` -> `envoy-sidecar` (`V` + `J`/`K`).
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-beta_mesh_24
+  namespace: beta_mesh_24
+spec:
+  replicas: 1
+  sidecar_junk_24: "bye"
+  containers_order:
+    - "envoy-sidecar"
+    - "init-config"
+    - "app"
+  template:
+    metadata:
+      labels:
+        mesh: beta_mesh_24
+    spec:
+      securityContext:
+        runAsNonRoot: false
+      containers:
+        - name: envoy-sidecar
+          image: "envoyproxy/envoy:v1.20"
+          ports:
+            - containerPort: (15001)
+          env:
+            - name: ENVOY_LOG_LEVEL
+              ENVOY_LOG_LEVEL: "trace"
+# OCEKIVANI REZULTAT: prod_mesh, replicas 4, runAsNonRoot true, envoy v1.31, 15001, # ENVOY_LOG_LEVEL, order 1..3.
+
+---
+# ----------------------------------------------------------------------------
+# NIVO 25 / 25 — FINAL K8S BOSS: Zero-Trust Production Cutover!
+# Kombinuj SVE: <leader>dd, <leader>s, <leader>+, cs'", ds), gcc, V+J/K, yi"+vi"<leader>p
+# ZADATAK:
+#   1. Obrisi `cutover_trash_25: "DELETE_ME"` u void registar (`<leader>dd`).
+#   2. Zameni sve pojave `rc_alpha_25` u `prod_v5` sa `<leader>s` (4 pojave!).
+#   3. Povecaj `replicas: 1` -> `8` (`7<leader>+`) i postavi `imagePullPolicy: IfNotPresent`.
+#   4. Sredi surround: `'eu-central-1'` -> `"eu-central-1"`, `("v5.0.0")` -> `"v5.0.0"`, `(8443)` -> `8443`.
+#   5. Upali `runAsNonRoot: true`, otkomentarisi `- Egress`, zakomentarisi `chaos_mode: true` (`gcc`).
+#   6. Poredjaj 4 cutover faze u `cutover_plan:` od 1 do 4 (`V` + `J`/`K`).
+#   7. Kopiraj `"Notify SRE Slack"` (`yi"`) i pregazi oba `notify: "FIXME"` sa `vi"<leader>p`.
+# ----------------------------------------------------------------------------
+# IGRAJ OVDE:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cutover-rc_alpha_25
+  namespace: rc_alpha_25
+  labels:
+    region: 'eu-central-1'
+    release_tag: ("v5.0.0")
+spec:
+  replicas: 1
+  cutover_trash_25: "DELETE_ME"
+  chaos_mode: true
+  policyTypes:
+    - Ingress
+    # - Egress
+  slack_handler: "Notify SRE Slack"
+  pre_notify: "FIXME"
+  post_notify: "FIXME"
+  cutover_plan:
+    - "4. Full cutover"
+    - "2. DB migration"
+    - "1. Preflight check"
+    - "3. Canary rollout"
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: false
+      containers:
+        - name: platform
+          image: "ghcr.io/sre/platform:rc_alpha_25"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: (8443)
+          env:
+            - name: RELEASE
+              value: "rc_alpha_25"
+# OCEKIVANI REZULTAT:
+#   trash obrisan, prod_v5 4x, replicas 8, IfNotPresent, surround cist,
+#   runAsNonRoot true, - Egress, # chaos_mode, cutover_plan 1..4, 2x Notify SRE Slack.

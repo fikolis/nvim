@@ -9,7 +9,7 @@ local M = {}
 local NS = vim.api.nvim_create_namespace("learn_dojo_marks")
 
 local GAMES = {}
-local GAMES_ORDER = { "core", "devops" }
+local GAMES_ORDER = { "core", "k8s", "ansible" }
 
 local state = {
     player = "default",
@@ -2286,22 +2286,31 @@ function M.setup()
         comment = "%-%-",
         levels = LEVELS,
     }
-    local yaml_builder = require("fikolis.learn_yaml_levels")
-    GAMES.devops = {
-        id = "devops",
-        file = "learn_nvim.yaml",
-        rel = "learning/learn_nvim.yaml",
-        title = "DevOps (Ansible & K8s)",
+    local yaml_levels = require("fikolis.learn_yaml_levels")
+    local yaml_helpers = {
+        play = function(lines, level)
+            return play(lines, level, "#")
+        end,
+        oneline = oneline,
+        ordered_lines = ordered_lines,
+        count_plain = count_plain,
+        code = code,
+    }
+    GAMES.k8s = {
+        id = "k8s",
+        file = "learn_k8s.yaml",
+        rel = "learning/k8s/learn_k8s.yaml",
+        title = "Kubernetes & OpenShift",
         comment = "#",
-        levels = yaml_builder({
-            play = function(lines, level)
-                return play(lines, level, "#")
-            end,
-            oneline = oneline,
-            ordered_lines = ordered_lines,
-            count_plain = count_plain,
-            code = code,
-        }),
+        levels = yaml_levels.k8s(yaml_helpers),
+    }
+    GAMES.ansible = {
+        id = "ansible",
+        file = "learn_ansible.yaml",
+        rel = "learning/ansible/learn_ansible.yaml",
+        title = "Ansible & RHEL 9",
+        comment = "#",
+        levels = yaml_levels.ansible(yaml_helpers),
     }
     load_progress()
     define_hl()
@@ -2309,7 +2318,7 @@ function M.setup()
     local group = vim.api.nvim_create_augroup("LearnDojo", { clear = true })
     vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufWinEnter" }, {
         group = group,
-        pattern = { "*learn_nvim.lua", "*learn_nvim.yaml" },
+        pattern = { "*learn_nvim.lua", "*learn_k8s.yaml", "*learn_ansible.yaml" },
         callback = function(ev)
             attach(ev.buf)
             if vim.b[ev.buf].learn_dojo then
