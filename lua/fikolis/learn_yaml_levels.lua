@@ -48,7 +48,7 @@ local function build_levels(H)
                     return oneline(play(lines, 1), "^%s*replicas:%s*3%s*$")
                 end, 1, "^%s*replicas:"),
                 code("nginx:1.27", function(lines)
-                    return oneline(play(lines, 1), 'image:%s*"nginx:1%.27"%s*$')
+                    return oneline(play(lines, 1), 'image:%s*"?nginx:1%.27"?%s*$')
                 end, 2, "^%s*image:"),
                 code("IfNotPresent", function(lines)
                     return oneline(play(lines, 1), "^%s*imagePullPolicy:%s*IfNotPresent%s*$")
@@ -311,7 +311,7 @@ local function build_levels(H)
                 end, 2, "^%s*port:"),
                 code('"TCP"', function(lines)
                     return oneline(play(lines, 17), 'protocol:%s*"TCP"%s*$')
-                end, 3, "^%s*protocol:"),
+                end, 3, "protocol:"),
                 code('"backend"', function(lines)
                     return oneline(play(lines, 17), 'role:%s*"backend"%s*$')
                 end, 4, "^%s*role:"),

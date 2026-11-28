@@ -27,7 +27,7 @@
 # Precice: 2<leader>+ (povecaj broj)  |  ci" / f:  |  ciw
 # ZADATAK:
 #   1. Stani na `1` u `replicas: 1` i povecaj na `3` pomocu `2<leader>+`.
-#   2. Promeni tag slike `nginx:1.25` u `nginx:1.27` (npr. `f5r7` ili `2<leader>+`).
+#   2. Promeni tag slike `nginx:1.25` u `nginx:1.27` (npr. `f5r7` ili `f2` pa `2<leader>+`).
 #   3. Promeni `imagePullPolicy: Always` u `IfNotPresent` pomocu `ciw`.
 # ----------------------------------------------------------------------------
 # IGRAJ OVDE:

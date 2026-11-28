@@ -21,6 +21,7 @@ local state = {
     ai_counts = {},
     runs = 0,
     saved_lines = nil,
+    saved_disk_sig = nil,
     announced = {},
     session = false,
     greeted = {},
@@ -29,6 +30,32 @@ local state = {
     armed = {},
     seen_fp = {},
 }
+
+local function disk_sig_for(buf)
+    if not buf or not vim.api.nvim_buf_is_valid(buf) then
+        return nil
+    end
+    local name = vim.api.nvim_buf_get_name(buf)
+    if name == "" or vim.fn.filereadable(name) ~= 1 then
+        return nil
+    end
+    local ok, lines = pcall(vim.fn.readfile, name)
+    if not ok or type(lines) ~= "table" then
+        return nil
+    end
+    return vim.fn.sha256(table.concat(lines, "\n"))
+end
+
+local function can_restore_saved_lines(buf)
+    if type(state.saved_lines) ~= "table" or #state.saved_lines <= 10 then
+        return false
+    end
+    local cur_sig = disk_sig_for(buf)
+    if not cur_sig or not state.saved_disk_sig or state.saved_disk_sig ~= cur_sig then
+        return false
+    end
+    return true
+end
 
 local function progress_path()
     if vim.g.learn_dojo_progress and vim.g.learn_dojo_progress ~= "" then
@@ -69,6 +96,7 @@ local function make_empty_slot()
         runs = 0,
         saved_at = os.date("%Y-%m-%d %H:%M"),
         saved_lines = nil,
+        saved_disk_sig = nil,
     }
 end
 
@@ -118,17 +146,24 @@ local function apply_slot(name, game_id)
     state.saved_lines = (type(slot.saved_lines) == "table" and #slot.saved_lines > 10)
             and vim.deepcopy(slot.saved_lines)
         or nil
+    state.saved_disk_sig = type(slot.saved_disk_sig) == "string" and slot.saved_disk_sig or nil
     state.announced = {}
     state.armed = {}
     state.seen_fp = {}
 end
 
-local function sync_active_slot(buf_lines)
+local function sync_active_slot(buf_lines, buf_sig)
     local rec, key = ensure_player_record(state.player)
     local gid = state.game or "core"
     state.player = key
     if buf_lines ~= nil then
-        state.saved_lines = buf_lines and vim.deepcopy(buf_lines) or nil
+        if buf_lines then
+            state.saved_lines = vim.deepcopy(buf_lines)
+            state.saved_disk_sig = buf_sig or state.saved_disk_sig
+        else
+            state.saved_lines = nil
+            state.saved_disk_sig = nil
+        end
     end
     rec.games[gid] = {
         actions = vim.deepcopy(state.actions),
@@ -138,6 +173,7 @@ local function sync_active_slot(buf_lines)
         runs = state.runs or 0,
         saved_at = os.date("%Y-%m-%d %H:%M"),
         saved_lines = state.saved_lines and vim.deepcopy(state.saved_lines) or nil,
+        saved_disk_sig = state.saved_disk_sig,
     }
 end
 
@@ -145,18 +181,18 @@ local function write_store()
     local path = progress_path()
     local dir = vim.fn.fnamemodify(path, ":h")
     if vim.fn.isdirectory(dir) == 0 then
-        vim.fn.mkdir(dir, "p")
+        pcall(vim.fn.mkdir, dir, "p")
     end
     local payload = {
         active = state.player,
         active_game = state.game,
         players = state.players,
     }
-    vim.fn.writefile({ vim.json.encode(payload) }, path)
+    pcall(vim.fn.writefile, { vim.json.encode(payload) }, path)
 end
 
-local function save_progress(buf_lines)
-    sync_active_slot(buf_lines)
+local function save_progress(buf_lines, buf_sig)
+    sync_active_slot(buf_lines, buf_sig)
     write_store()
 end
 
@@ -1054,7 +1090,7 @@ local function ensure_game_for_buf(buf)
     if state.game ~= gid then
         local prev_buf = dojo_bufs(state.game)[1]
         if prev_buf and vim.api.nvim_buf_is_valid(prev_buf) then
-            sync_active_slot(vim.api.nvim_buf_get_lines(prev_buf, 0, -1, false))
+            sync_active_slot(vim.api.nvim_buf_get_lines(prev_buf, 0, -1, false), disk_sig_for(prev_buf))
         else
             sync_active_slot()
         end
@@ -1712,8 +1748,13 @@ local function attach(buf)
     state.session = true
     local game = ensure_game_for_buf(buf) or GAMES[gid]
     vim.bo[buf].buftype = "acwrite"
-    if type(state.saved_lines) == "table" and #state.saved_lines > 10 then
+    if can_restore_saved_lines(buf) then
         apply_buffer_lines(buf, state.saved_lines)
+    elseif state.saved_lines ~= nil then
+        -- Disk file was updated (e.g. git pull); discard stale buffer snapshot while keeping solved progress
+        state.saved_lines = nil
+        state.saved_disk_sig = nil
+        save_progress(false)
     end
     wrap_keymaps(buf)
     vim.schedule(function()
@@ -1895,7 +1936,7 @@ function M.games(target)
         end
         local cur = current_dojo()
         if cur and vim.b[cur].learn_dojo and vim.b[cur].learn_dojo ~= gid then
-            save_progress(vim.api.nvim_buf_get_lines(cur, 0, -1, false))
+            save_progress(vim.api.nvim_buf_get_lines(cur, 0, -1, false), disk_sig_for(cur))
         end
         vim.cmd("edit " .. vim.fn.fnameescape(path))
         local buf = vim.api.nvim_get_current_buf()
@@ -1950,7 +1991,7 @@ local function do_new_game(name)
     local game = (buf and ensure_game_for_buf(buf)) or active_game(buf)
     if buf and state.player and state.player ~= clean then
         local prev_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-        save_progress(prev_lines)
+        save_progress(prev_lines, disk_sig_for(buf))
     end
     local rec = ensure_player_record(clean)
     rec.games[game.id] = make_empty_slot()
@@ -1995,7 +2036,7 @@ function M.save_game(name)
     end
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     local _, done_n = M.evaluate(lines, state, game.id)
-    save_progress(lines)
+    save_progress(lines, disk_sig_for(buf))
     vim.bo[buf].modified = false
     state.seen_fp[buf] = nil
     refresh(buf, false)
@@ -2021,12 +2062,12 @@ local function do_load_game(name)
     local game = (buf and ensure_game_for_buf(buf)) or active_game(buf)
     if buf and state.player and state.player ~= clean then
         local prev_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-        save_progress(prev_lines)
+        save_progress(prev_lines, disk_sig_for(buf))
     end
     apply_slot(clean, game.id)
     write_store()
     if buf then
-        if type(state.saved_lines) == "table" and #state.saved_lines > 10 then
+        if can_restore_saved_lines(buf) then
             apply_buffer_lines(buf, state.saved_lines)
         else
             restore_buf(buf)
@@ -2096,7 +2137,7 @@ function M.delete_game(name)
             local next_player = remaining[1] or "default"
             apply_slot(next_player, game.id)
             if buf then
-                if type(state.saved_lines) == "table" and #state.saved_lines > 10 then
+                if can_restore_saved_lines(buf) then
                     apply_buffer_lines(buf, state.saved_lines)
                 else
                     restore_buf(buf)
@@ -2285,9 +2326,9 @@ function M.setup()
         callback = function()
             for _, buf in ipairs(dojo_bufs()) do
                 ensure_game_for_buf(buf)
-                if not state.victory[buf] then
+                if not state.victory[buf] and vim.bo[buf].modified then
                     local cur_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-                    save_progress(cur_lines)
+                    save_progress(cur_lines, disk_sig_for(buf))
                 end
                 if vim.bo[buf].modified or vim.bo[buf].buftype == "acwrite" then
                     state.pausing[buf] = true
