@@ -24,10 +24,10 @@
 
 # ----------------------------------------------------------------------------
 # NIVO 01 / 50 — K8s Deployment Scale & Image Bump
-# Precice: 2<C-a> (povecaj broj)  |  ci" / f:  |  ciw
+# Precice: 2<leader>+ (povecaj broj)  |  ci" / f:  |  ciw
 # ZADATAK:
-#   1. Stani na `1` u `replicas: 1` i povecaj na `3` pomocu `2<C-a>`.
-#   2. Promeni tag slike `nginx:1.25` u `nginx:1.27` (npr. `f5r7` ili `2<C-a>`).
+#   1. Stani na `1` u `replicas: 1` i povecaj na `3` pomocu `2<leader>+`.
+#   2. Promeni tag slike `nginx:1.25` u `nginx:1.27` (npr. `f5r7` ili `2<leader>+`).
 #   3. Promeni `imagePullPolicy: Always` u `IfNotPresent` pomocu `ciw`.
 # ----------------------------------------------------------------------------
 # IGRAJ OVDE:
@@ -254,8 +254,8 @@ spec:
 
 ---
 # ----------------------------------------------------------------------------
-# NIVO 10 / 50 — K8s Ingress & HPA Combo (`cs'"`, `ci"`, `<C-a>`, `gcc`)
-# Precice: cs'"  |  ci"  |  <C-a>  |  gcc
+# NIVO 10 / 50 — K8s Ingress & HPA Combo (`cs'"`, `ci"`, `<leader>+`, `gcc`)
+# Precice: cs'"  |  ci"  |  <leader>+  |  gcc
 # ZADATAK:
 #   1. Promeni `host: 'old.example.com'` u `"api.prod.internal"`.
 #   2. Povecaj `minReplicas: 1` u `2` i `maxReplicas: 3` u `10`.
@@ -478,10 +478,10 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 18 / 50 — BOSS 1: K8s Production Deployment Surgery
-# Kombinuj: <C-a>, ci", ciw, gcc, <leader>s, ds)
+# Kombinuj: <leader>+, ci", ciw, gcc, <leader>s, ds)
 # ZADATAK:
 #   1. Zameni sve pojave `staging_pay_18` u `prod_pay` pomocu `<leader>s`.
-#   2. Povecaj `replicas: 1` u `3` (`2<C-a>`).
+#   2. Povecaj `replicas: 1` u `3` (`2<leader>+`).
 #   3. Promeni image u `"registry.internal/payments:v2.4.0"`.
 #   4. Promeni `runAsNonRoot: false` u `true` i skini zagrade oko `(8443)`.
 #   5. Zakomentarisi `DEBUG_MODE: "true"` sa `gcc`.
@@ -551,11 +551,11 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 20 / 50 — FINAL DEVOPS BOSS: Ansible + K8s GitOps Release Gauntlet
-# Kombinuj SVE: <leader>dd, <leader>s, <C-a>, cs'", ds), gcc, V+J/K!
+# Kombinuj SVE: <leader>dd, <leader>s, <leader>+, cs'", ds), gcc, V+J/K!
 # ZADATAK:
 #   1. Obrisi liniju `trash_flag_20: "DELETE_ME"` u void registar (`<leader>dd`).
 #   2. Zameni sve pojave `canary_v1` u `stable_v2` pomocu `<leader>s`.
-#   3. Povecaj `replicas: 1` na `5` (`4<C-a>`).
+#   3. Povecaj `replicas: 1` na `5` (`4<leader>+`).
 #   4. Promeni `env: 'staging'` u `"production"` i skini zagrade sa `(443)`.
 #   5. Zakomentarisi `dry_run: true` (`gcc`) i pomeri `tier: "critical"` na vrh `labels:`.
 # ----------------------------------------------------------------------------
@@ -590,9 +590,9 @@ spec:
 
 # ----------------------------------------------------------------------------
 # NIVO 21 / 50 — K8s StatefulSet: Postgres HA Klaster
-# Precice: 2<C-a>  |  ci"  |  ds)  |  gcc
+# Precice: 2<leader>+  |  ci"  |  ds)  |  gcc
 # ZADATAK:
-#   1. Povecaj `replicas: 1` u `3` (`2<C-a>`) i `serviceName: "pg-dev"` u `"postgres-headless"`.
+#   1. Povecaj `replicas: 1` u `3` (`2<leader>+`) i `serviceName: "pg-dev"` u `"postgres-headless"`.
 #   2. Promeni image u `"postgres:16.4-alpine"`.
 #   3. Skini zagrade oko `("50Gi")` (`ds)`) i promeni `storageClassName: "hdd"` u `"fast-ssd"`.
 #   4. Zakomentarisi `PG_DEBUG_SQL: "true"` pomocu `gcc`.
@@ -662,9 +662,9 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 23 / 50 — K8s PodDisruptionBudget & TopologySpread
-# Precice: <C-a>  |  cs'"  |  ciw  |  V + K
+# Precice: <leader>+  |  cs'"  |  ciw  |  V + K
 # ZADATAK:
-#   1. Povecaj `minAvailable: 0` u `2` (`2<C-a>`) i `maxSkew: 5` u `1`.
+#   1. Povecaj `minAvailable: 0` u `2` (`2<leader>+`) i `maxSkew: 5` u `1`.
 #   2. Promeni `topologyKey: 'kubernetes.io/hostname'` u `"topology.kubernetes.io/zone"`.
 #   3. Promeni `whenUnsatisfiable: ScheduleAnyway` u `DoNotSchedule`.
 #   4. Pomeri `app: checkout` na PRVO mesto ispod `matchLabels:` (`V` + `K`).
@@ -723,7 +723,7 @@ roleRef:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 25 / 50 — OpenShift Route & TLS Edge Termination
-# Precice: ci"  |  ciw  |  ds)  |  <C-a>  |  gcc
+# Precice: ci"  |  ciw  |  ds)  |  <leader>+  |  gcc
 # ZADATAK:
 #   1. Promeni `host: "portal.apps.dev.local"` u `"portal.apps.ocp-prod.internal"`.
 #   2. Promeni `termination: passthrough` u `edge` i `insecureEdgeTerminationPolicy: Allow` u `Redirect`.
@@ -790,9 +790,9 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 27 / 50 — Helm `values.yaml` Production Override
-# Precice: <C-a>  |  yi" + vi"<leader>p  |  ciw  |  V + >
+# Precice: <leader>+  |  yi" + vi"<leader>p  |  ciw  |  V + >
 # ZADATAK:
-#   1. Povecaj `replicaCount: 1` u `4` (`3<C-a>`).
+#   1. Povecaj `replicaCount: 1` u `4` (`3<leader>+`).
 #   2. Kopiraj `"v4.1.0"` iz `releaseVersion` (`yi"`) i pregazi `tag` i `appVersion` (`vi"<leader>p`).
 #   3. Promeni `pullPolicy: Always` u `IfNotPresent` i `ingress.enabled: false` u `true`.
 #   4. Uvuci `tls:` blok ispod `ingress:` (`tls:` na 2 razmaka, `secretName:` na 4 razmaka) sa `V` + `>`.
@@ -1124,11 +1124,11 @@ all:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 38 / 50 — Ansible `uri` Healthcheck + Retries
-# Precice: ci"  |  ds)  |  <C-a>  |  ciw  |  gcc
+# Precice: ci"  |  ds)  |  <leader>+  |  ciw  |  gcc
 # ZADATAK:
 #   1. Promeni `url: "http://localhost/health"` u `"https://api.prod.internal/health"`.
 #   2. Skini zagrade oko `status_code: (200)` (`ds)`).
-#   3. Povecaj `retries: 1` u `10` (`9<C-a>`) i `delay: 1` u `5` (`4<C-a>`).
+#   3. Povecaj `retries: 1` u `10` (`9<leader>+`) i `delay: 1` u `5` (`4<leader>+`).
 #   4. Postavi `validate_certs: true` i zakomentarisi `ignore_tls_hack: true` (`gcc`).
 # ----------------------------------------------------------------------------
 # IGRAJ OVDE:
@@ -1173,7 +1173,7 @@ all:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 40 / 50 — Ansible HAProxy + Keepalived VIP Failover
-# Precice: <leader>s  |  <C-a>  |  ci"  |  gcc  |  V + J/K
+# Precice: <leader>s  |  <leader>+  |  ci"  |  gcc  |  V + J/K
 # ZADATAK:
 #   1. Zameni sve pojave `old_vip_40` u `10.50.0.10` pomocu `<leader>s`.
 #   2. Postavi `priority: 150`, `vrrp_state: "MASTER"` i `check_interval: 2`.
@@ -1210,7 +1210,7 @@ all:
 
 # ----------------------------------------------------------------------------
 # NIVO 41 / 50 — INCIDENT: CrashLoopBackOff (OOMKilled + Los Probe!)
-# Precice: ci"  |  <C-a>  |  <leader>dd  |  gcc
+# Precice: ci"  |  <leader>+  |  <leader>dd  |  gcc
 # ZADATAK: Servis puca u produkciji svakih 5 sekundi! Popravi sve:
 #   1. Podigni resurse: `memory: "32Mi"` -> `"1Gi"` i `cpu: "50m"` -> `"500m"`.
 #   2. Sredi livenessProbe: `initialDelaySeconds: 1` -> `30`, `periodSeconds: 1` -> `10`, `failureThreshold: 1` -> `5`.
@@ -1246,11 +1246,11 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 42 / 50 — INCIDENT: Split-Brain DNS & CoreDNS Loop
-# Precice: <leader>s  |  ds)  |  ciw  |  <C-a>  |  gcc  |  V + K
+# Precice: <leader>s  |  ds)  |  ciw  |  <leader>+  |  gcc  |  V + K
 # ZADATAK:
 #   1. Zameni sve pojave `broken_dns_42` u `10.96.0.10` pomocu `<leader>s`.
 #   2. Skini zagrade oko `ndots: (2)` (`ds)`) i promeni `dnsPolicy: Default` u `ClusterFirst`.
-#   3. Povecaj `replicas: 1` u `3` (`2<C-a>`) i zakomentarisi `loop_forward: "127.0.0.1"` (`gcc`).
+#   3. Povecaj `replicas: 1` u `3` (`2<leader>+`) i zakomentarisi `loop_forward: "127.0.0.1"` (`gcc`).
 #   4. Pomeri `upstream_1: "1.1.1.1"` IZNAD `upstream_2: "8.8.8.8"` (`V` + `K`).
 # ----------------------------------------------------------------------------
 # IGRAJ OVDE:
@@ -1304,7 +1304,7 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 44 / 50 — INCIDENT: Ansible Playbook Bez Zastite na Produkciji
-# Precice: <C-a>  |  ciw  |  gcc  |  yi" + vi"<leader>p  |  V + K
+# Precice: <leader>+  |  ciw  |  gcc  |  yi" + vi"<leader>p  |  V + K
 # ZADATAK:
 #   1. Postavi `serial: 2`, `max_fail_percentage: 10`, `any_errors_fatal: true`.
 #   2. Zakomentarisi `force_reboot_all: true` (`gcc`).
@@ -1340,7 +1340,7 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 45 / 50 — INCIDENT: K8s DiskPressure & Evicted Pods
-# Precice: <C-a>  |  ci"  |  ds)  |  gcc  |  V + >
+# Precice: <leader>+  |  ci"  |  ds)  |  gcc  |  V + >
 # ZADATAK:
 #   1. Postavi `imageGCHighThresholdPercent: 80` i `imageGCLowThresholdPercent: 60`.
 #   2. Promeni `nodefs: "1%"` u `"10%"` i skini zagrade oko `maxSize: ("100Mi")` (`ds)`).
@@ -1370,10 +1370,10 @@ spec:
 
 # ----------------------------------------------------------------------------
 # NIVO 46 / 50 — BOSS 3: Multi-Container Sidecar + InitContainer Deployment
-# Kombinuj: <leader>s, <C-a>, ci", ciw, ds), gcc, <leader>dd, V+J/K
+# Kombinuj: <leader>s, <leader>+, ci", ciw, ds), gcc, <leader>dd, V+J/K
 # ZADATAK:
 #   1. Zameni sve pojave `beta_mesh_46` u `prod_mesh` (`<leader>s`).
-#   2. Povecaj `replicas: 1` u `4` (`3<C-a>`) i postavi `runAsNonRoot: true`.
+#   2. Povecaj `replicas: 1` u `4` (`3<leader>+`) i postavi `runAsNonRoot: true`.
 #   3. Promeni envoy image u `"envoyproxy/envoy:v1.31"` i skini zagrade sa `containerPort: (15001)` (`ds)`).
 #   4. Zakomentarisi `ENVOY_LOG_LEVEL: "trace"` (`gcc`) i obrisi `sidecar_junk_46: "bye"` (`<leader>dd`).
 #   5. Poredjaj `containers_order` redom: `init-config` -> `app` -> `envoy-sidecar` (`V` + `J`/`K`).
@@ -1414,7 +1414,7 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 47 / 50 — BOSS 4: Ansible Complete RHEL 9 Web+DB Role Playbook
-# Kombinuj: ciw, ct:, <C-a>, V+J/K, yi"+vi"<leader>p, gcc, <leader>dd
+# Kombinuj: ciw, ct:, <leader>+, V+J/K, yi"+vi"<leader>p, gcc, <leader>dd
 # ZADATAK:
 #   1. Postavi `hosts: rhel9_prod`, `become: true`, `serial: 1` i `selinux_state: enforcing`.
 #   2. Prebaci `yum:` -> `ansible.builtin.dnf:` i `service:` -> `ansible.builtin.systemd:` (`ct:`).
@@ -1494,10 +1494,10 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 49 / 50 — BOSS 6: OpenShift + Ansible Disaster Recovery Failover
-# Kombinuj: <leader>s, <C-a>, ciw, V+J/K, gcc, <leader>dd
+# Kombinuj: <leader>s, <leader>+, ciw, V+J/K, gcc, <leader>dd
 # ZADATAK:
 #   1. Zameni sve pojave `dr_old_49` u `dr_frankfurt` (`<leader>s`).
-#   2. Povecaj `replicas: 1` u `6` (`5<C-a>`), `weight: 0` u `100` i `serial: 10` u `1`.
+#   2. Povecaj `replicas: 1` u `6` (`5<leader>+`), `weight: 0` u `100` i `serial: 10` u `1`.
 #   3. Postavi `termination: reencrypt` i `validate_certs: true`.
 #   4. Zakomentarisi `skip_backup_verify: true` (`gcc`) i obrisi `dr_test_junk_49: "x"` (`<leader>dd`).
 #   5. Poredjaj DR korake u `dr_steps:` od 1 do 4 (`V` + `J`/`K`).
@@ -1529,12 +1529,12 @@ spec:
 ---
 # ----------------------------------------------------------------------------
 # NIVO 50 / 50 — FINAL GRAND MASTER BOSS: Full SRE Production Cutover!
-# Kombinuj APOSLUTNO SVE: <leader>dd, <leader>s, <C-a>, cs'", ds), gcc,
+# Kombinuj APOSLUTNO SVE: <leader>dd, <leader>s, <leader>+, cs'", ds), gcc,
 #                         V+J/K, yi"+vi"<leader>p, ciw, ci"!
 # ZADATAK:
 #   1. Obrisi `cutover_trash_50: "DELETE_ME"` u void registar (`<leader>dd`).
 #   2. Zameni sve pojave `rc_alpha_50` u `prod_v5` pomocu `<leader>s` (4 pojave!).
-#   3. Povecaj `replicas: 1` -> `8` (`7<C-a>`) i spusti `serial: 5` -> `1`.
+#   3. Povecaj `replicas: 1` -> `8` (`7<leader>+`) i spusti `serial: 5` -> `1`.
 #   4. Sredi surround: `'eu-central-1'` -> `"eu-central-1"`, `("v5.0.0")` -> `"v5.0.0"`, `(8443)` -> `8443`.
 #   5. Upali `runAsNonRoot: true` i `become: true`; zakomentarisi `chaos_mode: true` i `DEBUG_TRACE: "1"` (`gcc`).
 #   6. Poredjaj 4 cutover faze u `cutover_plan:` od 1 do 4 (`V` + `J`/`K`).

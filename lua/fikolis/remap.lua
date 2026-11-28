@@ -49,6 +49,9 @@ end, { desc = "Source current Lua/Vim file" })
 
 vim.keymap.set("n", "<leader>lr", "<cmd>lsp restart<CR>", { desc = "Restart LSP for current buffer" })
 
+vim.keymap.set({ "n", "x" }, "<leader>+", "<C-a>", { desc = "Increment number (tmux-safe)" })
+vim.keymap.set({ "n", "x" }, "<leader>-", "<C-x>", { desc = "Decrement number (tmux-safe)" })
+
 vim.keymap.set("n", "<leader>u", function()
     vim.cmd.packadd("nvim.undotree")
     require("undotree").open()
